@@ -7,12 +7,11 @@ export default async function Home() {
     headers: await headers(),
   });
 
-  console.log("SESSION", session);
-  return <div>Home</div>;
 
-  // if (session?.session) {
-  //   redirect("/dashboard");
-  // } else {
-  //   redirect("/login");
-  // }
+  if (session?.session) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
 }
+

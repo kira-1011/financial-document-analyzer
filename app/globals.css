@@ -59,8 +59,8 @@
   --accent: oklch(0.25 0.06 115); /* dark lime accent */
   --accent-foreground: oklch(0.91 0.24 115);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.28 0 0);
-  --input: oklch(0.22 0 0);
+  --border: oklch(0.3 0 0);
+  --input: oklch(0.3 0 0);
   --ring: oklch(0.91 0.24 115); /* lime */
   --chart-1: oklch(0.91 0.24 115);
   --chart-2: oklch(0.75 0.2 115);

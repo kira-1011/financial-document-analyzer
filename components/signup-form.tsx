@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,11 +21,18 @@ import { Input } from "@/components/ui/input";
 import { signupAction } from "@/app/(auth)/actions";
 import type { SignupState } from "@/types";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const initialState: SignupState = {};
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [state, formAction, pending] = useActionState(signupAction, initialState);
+
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
     <Card {...props}>
@@ -38,11 +45,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       <CardContent>
         <form action={formAction}>
           <FieldGroup>
-            {state.message && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 dark:text-red-400 rounded-lg">
-                {state.message}
-              </div>
-            )}
             <Field>
               <FieldLabel htmlFor="name">Full Name</FieldLabel>
               <Input

@@ -5,6 +5,7 @@ export type LoginState = {
     password?: string[];
   };
   message?: string;
+  success?: boolean;
 };
 
 export type SignupState = {
@@ -15,5 +16,6 @@ export type SignupState = {
     confirmPassword?: string[];
   };
   message?: string;
+  success?: boolean;
 };
 

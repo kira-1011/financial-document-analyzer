@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { loginAction } from "@/app/(auth)/actions";
 import type { LoginState } from "@/types";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const initialState: LoginState = {};
 
@@ -30,6 +31,12 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+
+  useEffect(() => {
+    if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -43,11 +50,6 @@ export function LoginForm({
         <CardContent>
           <form action={formAction}>
             <FieldGroup>
-              {state.message && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 dark:text-red-400 rounded-lg">
-                  {state.message}
-                </div>
-              )}
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
