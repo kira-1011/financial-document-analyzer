@@ -41,7 +41,7 @@ export async function loginAction(
 
     try {
         await auth.api.signInEmail({
-            body: { email, password, rememberMe: true },
+            body: { email, password, rememberMe: true, },
             headers: await headers(),
         });
 
@@ -53,7 +53,8 @@ export async function loginAction(
         };
     }
 
-    redirect("/dashboard");
+    redirect("/");
+
 }
 
 export async function signupAction(
@@ -87,7 +88,6 @@ export async function signupAction(
         };
     }
 
-    return {
-        success: true,
-    };
+    redirect("/");
+
 }
