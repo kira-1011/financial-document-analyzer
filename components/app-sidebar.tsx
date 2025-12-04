@@ -21,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { ModeToggle } from "./mode-toggle"
 
 const data = {
   navMain: [
@@ -76,25 +77,28 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/">
-                <Image
-                  src="/docu-finance-logo.svg"
-                  alt="DocuFinance"
-                  width={32}
-                  height={32}
-                  className="size-8"
-                />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">DocuFinance</span>
-                  <span className="truncate text-xs text-muted-foreground">AI Document Analyzer</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center justify-between">
+          <SidebarMenu className="flex-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <a href="/">
+                  <Image
+                    src="/docu-finance-logo.svg"
+                    alt="DocuFinance"
+                    width={32}
+                    height={32}
+                    className="size-8"
+                  />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">DocuFinance</span>
+                    <span className="truncate text-xs text-muted-foreground">AI Document Analyzer</span>
+                  </div>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <ModeToggle />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

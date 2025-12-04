@@ -99,22 +99,22 @@ export default async function Home() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3">
                 <Link href="/documents/upload" className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/50 transition-colors">
-                  <div className="rounded-full bg-primary/10 p-3">
-                    <Upload className="h-6 w-6 text-primary" />
+                  <div className="rounded-full bg-primary p-3">
+                    <Upload className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <p className="font-medium">Upload Document</p>
                   <p className="text-sm text-muted-foreground">PDF files supported</p>
                 </Link>
                 <Link href="/documents" className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/50 transition-colors">
-                  <div className="rounded-full bg-primary/10 p-3">
-                    <FileText className="h-6 w-6 text-primary" />
+                  <div className="rounded-full bg-primary p-3">
+                    <FileText className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <p className="font-medium">View Documents</p>
                   <p className="text-sm text-muted-foreground">Browse all documents</p>
                 </Link>
                 <Link href="/search" className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/50 transition-colors">
-                  <div className="rounded-full bg-primary/10 p-3">
-                    <CheckCircle className="h-6 w-6 text-primary" />
+                  <div className="rounded-full bg-primary p-3">
+                    <CheckCircle className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <p className="font-medium">Search Documents</p>
                   <p className="text-sm text-muted-foreground">Find extracted data</p>
