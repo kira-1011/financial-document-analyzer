@@ -14,8 +14,6 @@ export default function AuthLayout({
                 <ModeToggle />
             </div>
 
-
-
             {/* left side - Auth form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-secondary">
                 <div className="w-full max-w-sm">{children}</div>
@@ -41,7 +39,7 @@ export default function AuthLayout({
                             AI-Powered Financial
                             <br />
                             <span className="text-primary">
-                                Document Analysis
+                                Document Extraction
                             </span>
                         </h1>
                         <p className="text-lg text-muted-foreground max-w-md">

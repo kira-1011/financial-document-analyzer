@@ -91,7 +91,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">DocuFinance</span>
-                    <span className="truncate text-xs text-muted-foreground">AI Document Analyzer</span>
+                    <span className="truncate text-xs text-muted-foreground">AI Document Extractor</span>
                   </div>
                 </a>
               </SidebarMenuButton>

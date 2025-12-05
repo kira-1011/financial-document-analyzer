@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "DocuFinance - AI Document Analyzer",
-  description: "AI-powered financial document analysis",
+  description: "AI-powered financial document extraction",
 };
 
 export default function RootLayout({
