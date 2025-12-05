@@ -45,8 +45,6 @@ export async function loginAction(
             headers: await headers(),
         });
 
-
-
     } catch (error) {
         return {
             message: (error as APIError)?.message || "Invalid email or password",
