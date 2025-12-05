@@ -53,6 +53,7 @@ export const auth = betterAuth({
               name: `${user.name}'s Org`,
               slug: `${slug}-${Date.now()}`,
               userId: user.id,
+              keepCurrentActiveOrganization: true,
             },
           });
         },

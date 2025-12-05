@@ -30,9 +30,6 @@ export function OrganizationSwitcher() {
     const { data: organizations, isPending: isLoadingOrgs } = useListOrganizations();
     const { data: activeOrganization } = useActiveOrganization();
 
-    console.log("Organizations:", organizations);
-    console.log("Active Organization:", activeOrganization);
-
     // activate the first organization by default
     React.useEffect(() => {
         if (organizations && organizations.length > 0) {
