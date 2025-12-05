@@ -46,8 +46,10 @@ export async function loginAction(
         });
 
     } catch (error) {
+        console.error("[loginAction] Error logging in:", error);
+
         return {
-            message: (error as APIError)?.message || "Invalid email or password",
+            message: "Invalid email or password",
         };
     }
 
@@ -81,11 +83,10 @@ export async function signupAction(
         });
 
     } catch (error) {
+        console.error("[signupAction] Error creating account:", error);
         return {
-            message: (error as APIError)?.message || "Failed to create account",
+            message: "Failed to create account",
         };
     }
-
     redirect("/");
-
 }

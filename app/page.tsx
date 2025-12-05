@@ -25,9 +25,6 @@ export default async function Home() {
     redirect("/login");
   }
 
-
-
-
   const stats = [
     { title: "Total Documents", value: "0", description: "Documents uploaded", icon: FileText },
     { title: "Processed", value: "0", description: "Successfully extracted", icon: CheckCircle },
