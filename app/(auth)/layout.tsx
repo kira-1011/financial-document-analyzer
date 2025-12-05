@@ -14,8 +14,15 @@ export default function AuthLayout({
                 <ModeToggle />
             </div>
 
-            {/* Left side - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-background dark:bg-secondary relative overflow-hidden">
+
+
+            {/* left side - Auth form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-secondary">
+                <div className="w-full max-w-sm">{children}</div>
+            </div>
+
+            {/* right side - Branding */}
+            <div className="hidden lg:flex lg:w-1/2 bg-background relative overflow-hidden">
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-6">
@@ -64,11 +71,6 @@ export default function AuthLayout({
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Right side - Auth form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-secondary dark:bg-background">
-                <div className="w-full max-w-md">{children}</div>
             </div>
         </div>
     );
