@@ -49,7 +49,7 @@ export async function loginAction(
         console.error("[loginAction] Error logging in:", error);
 
         return {
-            message: "Invalid email or password",
+            message: error instanceof APIError ? error.message : "Invalid email or password",
         };
     }
 
@@ -79,14 +79,16 @@ export async function signupAction(
     try {
         await auth.api.signUpEmail({
             body: { name, email, password },
-            headers: await headers(),
+            headers: await headers()
         });
+
 
     } catch (error) {
         console.error("[signupAction] Error creating account:", error);
         return {
-            message: "Failed to create account",
+            message: error instanceof APIError ? error.message : "Failed to create account",
         };
     }
+
     redirect("/");
 }

@@ -3,7 +3,6 @@ import { organization, } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { Pool } from "pg";
 import { ac, owner, admin, member } from "@/lib/permissions";
-import { headers } from "next/headers";
 
 export const auth = betterAuth({
   database: new Pool({
@@ -37,21 +36,24 @@ export const auth = betterAuth({
         // });
       },
     }),
-
-    nextCookies(), // This handles cookies automatically in Next.js!
+    nextCookies(),
   ],
+
+  // Database hooks for auto-creating organization
   databaseHooks: {
     user: {
       create: {
-        async after(user) {
+        after: async (user) => {
+          // Auto-create a default organization for new users
           const slug = user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
-          await auth.api.createOrganization({
+
+          // Use the internal adapter to create organization directly
+          const org = await auth.api.createOrganization({
             body: {
-              name: `${user.name}'s Organization`,
-              slug,
+              name: `${user.name}'s Org`,
+              slug: `${slug}-${Date.now()}`,
               userId: user.id,
             },
-            headers: await headers(),
           });
         },
       },
@@ -66,5 +68,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-

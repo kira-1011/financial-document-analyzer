@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus, Building2, Loader2 } from "lucide-react";
+import { ChevronsUpDown, Plus, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
     DropdownMenu,
@@ -17,6 +17,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { organization, useListOrganizations, useActiveOrganization } from "@/lib/auth-client";
 import { toast } from "sonner";
 
@@ -31,6 +32,13 @@ export function OrganizationSwitcher() {
 
     console.log("Organizations:", organizations);
     console.log("Active Organization:", activeOrganization);
+
+    // activate the first organization by default
+    React.useEffect(() => {
+        if (organizations && organizations.length > 0) {
+            organization.setActive({ organizationId: organizations[0].id });
+        }
+    }, [organizations]);
 
     const handleSwitch = async (orgId: string) => {
         if (orgId === activeOrganization?.id) return;
@@ -47,17 +55,16 @@ export function OrganizationSwitcher() {
         }
     };
 
-    // Loading state
+    // Loading state with Skeleton
     if (isLoadingOrgs) {
         return (
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" disabled>
-                        <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                            <Loader2 className="size-4 animate-spin" />
-                        </div>
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-medium">Loading...</span>
+                        <Skeleton className="size-8 rounded-lg" />
+                        <div className="grid flex-1 gap-1">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-16" />
                         </div>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
