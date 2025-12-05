@@ -50,10 +50,6 @@ const data = {
           title: "Organization",
           url: "/settings/organization",
         },
-        {
-          title: "API Keys",
-          url: "/settings/api-keys",
-        },
       ],
     },
   ],

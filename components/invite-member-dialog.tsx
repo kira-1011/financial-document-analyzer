@@ -1,4 +1,3 @@
-// components/invite-member-dialog.tsx
 "use client";
 
 import { useState } from "react";
