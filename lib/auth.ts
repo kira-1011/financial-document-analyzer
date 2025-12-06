@@ -4,10 +4,12 @@ import { nextCookies } from "better-auth/next-js";
 import { Pool } from "pg";
 import { ac, owner, admin, member } from "@/lib/permissions";
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
+  database: pool,
   emailAndPassword: {
     enabled: true,
   },
@@ -23,6 +25,11 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
+      organizationHooks: {
+        afterCreateOrganization: async (data) => {
+          console.log("Organization created inside the hook:", data);
+        },
+      },
       accessControl: ac,
       roles: {
         owner,
@@ -66,6 +73,35 @@ export const auth = betterAuth({
               keepCurrentActiveOrganization: true,
             },
           });
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          // Query the user's organization membership
+          try {
+            const result = await pool.query(
+              `SELECT "organizationId" FROM member WHERE "userId" = $1 LIMIT 1`,
+              [session.userId]
+            );
+
+            const organizationId = result.rows[0]?.organizationId || null;
+            
+            if (organizationId) {
+              console.log(`Auto-setting activeOrganizationId for session ${session.id}: ${organizationId}`);
+            }
+            
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: organizationId,
+              },
+            };
+          } catch (error) {
+            console.error("Failed to get org for session:", error);
+            return { data: session };
+          }
         },
       },
     },

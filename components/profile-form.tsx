@@ -219,7 +219,15 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <AlertDialog 
+                        open={deleteDialogOpen} 
+                        onOpenChange={(open) => {
+                            // Prevent closing while deletion is in progress
+                            if (!isDeletePending) {
+                                setDeleteDialogOpen(open);
+                            }
+                        }}
+                    >
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive">
                                 Delete Account
@@ -249,7 +257,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
                                     </div>
                                 </div>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                                    <AlertDialogCancel type="button" disabled={isDeletePending}>
+                                        Cancel
+                                    </AlertDialogCancel>
                                     <AlertDialogAction
                                         type="submit"
                                         disabled={isDeletePending}

@@ -26,16 +26,8 @@ export function OrganizationSwitcher() {
     const router = useRouter();
     const [isPending, setIsPending] = React.useState(false);
 
-    // Use Better Auth client hooks
     const { data: organizations, isPending: isLoadingOrgs } = useListOrganizations();
-    const { data: activeOrganization } = useActiveOrganization();
-
-    // activate the first organization by default
-    React.useEffect(() => {
-        if (organizations && organizations.length > 0) {
-            organization.setActive({ organizationId: organizations[0].id });
-        }
-    }, [organizations]);
+    const { data: activeOrganization, isPending: isLoadingActive } = useActiveOrganization();
 
     const handleSwitch = async (orgId: string) => {
         if (orgId === activeOrganization?.id) return;
@@ -53,7 +45,7 @@ export function OrganizationSwitcher() {
     };
 
     // Loading state with Skeleton
-    if (isLoadingOrgs) {
+    if (isLoadingOrgs || isLoadingActive) {
         return (
             <SidebarMenu>
                 <SidebarMenuItem>
