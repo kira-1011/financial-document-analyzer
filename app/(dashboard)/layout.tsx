@@ -39,10 +39,6 @@ export default async function DashboardLayout({
                 activeOrganization={activeOrganization}
             />
             <SidebarInset>
-                {/* Brand in top right corner */}
-                <div className="absolute top-4 right-4 z-10">
-                    <Brand size="sm" iconOnly />
-                </div>
                 {children}
             </SidebarInset>
         </SidebarProvider>

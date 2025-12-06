@@ -49,40 +49,45 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
     const documentPart = createDocumentPart(fileUrl, mimeType);
     const model = google(AI_MODEL);
 
-    // Step 1: Classify the document
-    const { object: classification } = await generateObject({
-        model,
-        schema: routerSchema,
-        system: ROUTER_SYSTEM_PROMPT,
-        messages: [
-            {
-                role: "user",
-                content: [
-                    { type: "text", text: "Classify this financial document:" },
-                    documentPart,
-                ],
-            },
-        ],
-    });
+    try {
+        // Step 1: Classify the document
+        const { object: classification } = await generateObject({
+            model,
+            schema: routerSchema,
+            system: ROUTER_SYSTEM_PROMPT,
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: "Classify this financial document:" },
+                        documentPart,
+                    ],
+                },
+            ],
+        });
 
-    // Step 2: Route to appropriate extractor based on classification
-    const { object: extractedData } = await generateObject({
-        model,
-        schema: EXTRACTION_SCHEMAS[classification.documentType],
-        system: EXTRACTION_PROMPTS[classification.documentType],
-        messages: [
-            {
-                role: "user",
-                content: [
-                    { type: "text", text: "Extract all information from this document:" },
-                    documentPart,
-                ],
-            },
-        ],
-    });
+        // Step 2: Route to appropriate extractor based on classification
+        const { object: extractedData } = await generateObject({
+            model,
+            schema: EXTRACTION_SCHEMAS[classification.documentType],
+            system: EXTRACTION_PROMPTS[classification.documentType],
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: "Extract all information from this document:" },
+                        documentPart,
+                    ],
+                },
+            ],
+        });
 
-    return {
-        classification,
-        extractedData,
-    };
+        return {
+            classification,
+            extractedData,
+        };
+    } catch (error) {
+        console.error("[extractDocument] Error:", error);
+        throw error;
+    }
 }

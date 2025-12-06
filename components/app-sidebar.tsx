@@ -18,6 +18,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import { OrganizationSwitcher } from "@/components/organization-switcher"
+import { Brand } from "@/components/brand"
 
 const data = {
   navMain: [
@@ -25,9 +26,7 @@ const data = {
     { title: "Documents", url: "/documents", icon: FileText },
     { title: "Settings", url: "/settings", icon: Settings },
   ],
-  navSecondary: [
-    { title: "Help & Support", url: "/support", icon: HelpCircle },
-  ]
+  navSecondary: [ ]
 }
 
 interface Organization {
@@ -53,7 +52,7 @@ export function AppSidebar({ user, organizations, activeOrganization, ...props }
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <OrganizationSwitcher 
+        <OrganizationSwitcher
           organizations={organizations}
           activeOrganization={activeOrganization}
         />
@@ -63,11 +62,13 @@ export function AppSidebar({ user, organizations, activeOrganization, ...props }
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
+        <Brand size="sm" />
         <NavUser user={{
           name: user.name,
           email: user.email,
           avatar: user.image || "",
         }} />
+
       </SidebarFooter>
     </Sidebar>
   )
