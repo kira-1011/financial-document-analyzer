@@ -24,8 +24,8 @@ export default async function Home() {
     });
 
     // Fetch document stats if org is active
-    const docStats = activeOrg 
-        ? await fetchDocumentStats(activeOrg.id) 
+    const docStats = activeOrg
+        ? await fetchDocumentStats(activeOrg.id)
         : { total: 0, completed: 0, processing: 0, pending: 0, failed: 0 };
 
     const stats = [
@@ -36,21 +36,19 @@ export default async function Home() {
 
     return (
         <>
-            <header className="flex h-16 shrink-0 items-center gap-2">
-                <div className="flex items-center gap-2 px-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>Dashboard</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
             </header>
 
-            <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+            <div className="flex flex-1 flex-col gap-6 p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">

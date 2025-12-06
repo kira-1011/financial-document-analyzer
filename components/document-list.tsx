@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FileText, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -80,11 +81,19 @@ export function DocumentList({ documents }: DocumentListProps) {
                 </TableHeader>
                 <TableBody>
                     {documents.map((doc) => (
-                        <TableRow key={doc.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableRow 
+                            key={doc.id} 
+                            className="relative hover:bg-muted/50"
+                        >
                             <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-muted-foreground" />
-                                    <span className="truncate max-w-[200px]">{doc.fileName}</span>
+                                    <Link 
+                                        href={`/documents/${doc.id}`}
+                                        className="truncate max-w-[200px] after:absolute after:inset-0"
+                                    >
+                                        {doc.fileName}
+                                    </Link>
                                 </div>
                             </TableCell>
                             <TableCell>

@@ -1,9 +1,8 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { fetchDocuments } from "@/lib/documents/api";
-import { UploadDocumentDialog } from "@/components/upload-document-dialog";
-import { DocumentList } from "@/components/document-list";
+import { redirect, notFound } from "next/navigation";
+import { fetchDocument, getSignedUrlForFile } from "@/lib/documents/api";
+import { DocumentDetail } from "@/components/document-detail";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -15,7 +14,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default async function DocumentsPage() {
+interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default async function DocumentPage({ params }: PageProps) {
+    const { id } = await params;
+
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -24,19 +29,19 @@ export default async function DocumentsPage() {
         redirect("/login");
     }
 
-    const activeOrg = await auth.api.getFullOrganization({
-        headers: await headers(),
-    });
+    const document = await fetchDocument(id);
 
-    if (!activeOrg) {
-        return (
-            <div className="p-6">
-                <p className="text-muted-foreground">Please select an organization first.</p>
-            </div>
-        );
+    if (!document) {
+        notFound();
     }
 
-    const documents = await fetchDocuments(activeOrg.id);
+    // Get signed URL for PDF preview
+    let fileUrl: string | null = null;
+    try {
+        fileUrl = await getSignedUrlForFile(document.filePath);
+    } catch (error) {
+        console.error("Failed to get signed URL:", error);
+    }
 
     return (
         <>
@@ -50,25 +55,22 @@ export default async function DocumentsPage() {
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbPage>Documents</BreadcrumbPage>
+                            <BreadcrumbLink href="/documents">Documents</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbPage className="truncate max-w-[200px]">
+                                {document.fileName}
+                            </BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
 
             <div className="flex flex-1 flex-col gap-6 p-4">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold">Documents</h1>
-                        <p className="text-muted-foreground">
-                            {documents.length} document{documents.length !== 1 ? "s" : ""}
-                        </p>
-                    </div>
-                    <UploadDocumentDialog />
-                </div>
-
-                <DocumentList documents={documents} />
+                <DocumentDetail document={document} fileUrl={fileUrl} />
             </div>
         </>
     );
 }
+
