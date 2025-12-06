@@ -4,3 +4,6 @@ export type Session = typeof authClient.$Infer.Session;
 export type ActiveOrganization = typeof authClient.$Infer.ActiveOrganization;
 export type Organization = typeof authClient.$Infer.Organization;
 export type User = typeof authClient.$Infer.Session.user;
+export type Member = typeof authClient.$Infer.Member;
+export type Invitation = typeof authClient.$Infer.Invitation;
+export type UserRole = typeof authClient.$Infer.Member.role;

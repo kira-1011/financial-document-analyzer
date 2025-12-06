@@ -16,6 +16,7 @@ import { loginAction } from "@/app/(auth)/actions";
 import type { LoginState } from "@/types";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 const initialState: LoginState = {};
 
@@ -24,6 +25,9 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"form">) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+const searchParams = useSearchParams();
+const callbackUrl = searchParams.get("callbackUrl") || "";
+
 
   useEffect(() => {
     if (state.message) {
@@ -40,6 +44,8 @@ export function LoginForm({
             Enter your email below to login to your account
           </p>
         </div>
+        {/* Hidden input for callbackUrl */}
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input

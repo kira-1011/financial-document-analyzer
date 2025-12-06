@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -29,6 +30,7 @@ interface InviteMemberDialogProps {
 }
 
 export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<"member" | "admin">("member");
@@ -49,6 +51,7 @@ export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) 
             setOpen(false);
             setEmail("");
             setRole("member");
+            router.refresh(); // Refresh to show new invitation
         } catch (error) {
             toast.error("Failed to send invitation");
         } finally {

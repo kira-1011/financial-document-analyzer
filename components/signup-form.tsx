@@ -16,6 +16,7 @@ import { signupAction } from "@/app/(auth)/actions";
 import type { SignupState } from "@/types";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 const initialState: SignupState = {};
 
@@ -24,6 +25,8 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"form">) {
   const [state, formAction, pending] = useActionState(signupAction, initialState);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "";
 
   useEffect(() => {
     if (state.message) {
@@ -35,6 +38,7 @@ export function SignupForm({
     <form action={formAction} className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <h1 className="text-2xl font-bold text-center">Create an account</h1>
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <Field>
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
           <Input

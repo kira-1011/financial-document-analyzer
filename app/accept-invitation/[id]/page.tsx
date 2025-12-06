@@ -15,36 +15,12 @@ export default async function InvitationPage({ params }: PageProps) {
         headers: await headers(),
     });
 
-    // Fetch invitation server-side
-    let invitation = null;
-    let error = null;
-
-    try {
-        invitation = await auth.api.getInvitation({
-            query: { id },
-            headers: await headers(),
-        });
-    } catch (e) {
-        error = "Failed to fetch invitation";
-    }
-
-    // If no invitation found
-    if (!invitation) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="absolute pointer-events-none inset-0 flex items-center justify-center" />
-                <InvitationError error={error || "Invitation not found"} />
-            </div>
-        );
-    }
-
-    // If user not logged in, show login prompt
+    // If not logged in, show login prompt
     if (!session) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="absolute pointer-events-none inset-0 flex items-center justify-center" />
                 <InvitationError
-                    error="Please sign in to accept this invitation"
+                    error="Please sign in to view and accept this invitation"
                     showAuthLinks
                     invitationId={id}
                 />
@@ -52,10 +28,10 @@ export default async function InvitationPage({ params }: PageProps) {
         );
     }
 
+    // User is logged in - let client component handle the rest
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="absolute pointer-events-none inset-0 flex items-center justify-center"/>
-            <InvitationHandler invitation={invitation} invitationId={id} />
+            <InvitationHandler invitationId={id} />
         </div>
     );
 }

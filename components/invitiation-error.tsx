@@ -42,13 +42,13 @@ export function InvitationError({ error, showAuthLinks, invitationId }: Invitati
             <CardFooter className="flex justify-center gap-2">
                 {showAuthLinks ? (
                     <>
-                        <Button asChild variant="outline">
-                            <Link href={`/login?redirect=/accept-invitation/${invitationId}`}>
+                        <Button asChild>
+                            <Link href={`/login?callbackUrl=/accept-invitation/${invitationId}`}>
                                 Sign In
                             </Link>
                         </Button>
-                        <Button asChild>
-                            <Link href={`/signup?redirect=/accept-invitation/${invitationId}`}>
+                        <Button variant="outline" asChild>
+                            <Link href={`/signup?callbackUrl=/accept-invitation/${invitationId}`}>
                                 Create Account
                             </Link>
                         </Button>

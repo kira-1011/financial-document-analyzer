@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckIcon, XIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,69 +12,126 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { organization } from "@/lib/auth-client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient, organization } from "@/lib/auth-client";
 import { toast } from "sonner";
-
-interface Invitation {
-    organizationName: string;
-    organizationSlug: string;
-    inviterEmail: string;
-    id: string;
-    status: "pending" | "accepted" | "rejected" | "canceled";
-    email: string;
-    expiresAt: Date;
-    organizationId: string;
-    role: string;
-    inviterId: string;
-}
+import type { Invitation } from "@/lib/auth-types";
 
 interface InvitationHandlerProps {
-    invitation: Invitation;
     invitationId: string;
 }
 
-export function InvitationHandler({ invitation, invitationId }: InvitationHandlerProps) {
+
+export function InvitationHandler({ invitationId }: InvitationHandlerProps) {
     const router = useRouter();
-    const [status, setStatus] = useState<"pending" | "accepted" | "rejected">(
-        invitation.status === "pending" ? "pending" : invitation.status as "accepted" | "rejected"
-    );
-    const [isAccepting, setIsAccepting] = useState(false);
-    const [isRejecting, setIsRejecting] = useState(false);
+    const [invitation, setInvitation] = useState<Invitation & {
+        organizationName: string;
+        organizationSlug: string;
+        inviterEmail: string;
+    } | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [status, setStatus] = useState<Invitation["status"]>("pending");
+    const [isAccepting, setIsAccepting] = useState<boolean>(false);
+    const [isRejecting, setIsRejecting] = useState<boolean>(false);
 
-    const handleAccept = async () => {
+    // Fetch invitation on mount
+    useEffect(() => {
+        const fetchInvitation = async () => {
+            try {
+                const res = await authClient.organization.getInvitation({
+                    query: { id: invitationId },
+                });
+
+                if (res.error) {
+                    setError(res.error.message || "Failed to fetch invitation");
+                } else {
+                    setInvitation(res.data);
+                    if (res.data.status !== "pending") {
+                        setStatus(res.data.status as Invitation["status"]);
+                    }
+                }
+            } catch (error) {
+                console.error("[fetchInvitation] Error:", error);
+                setError("Failed to fetch invitation");
+            }
+        };
+
+        fetchInvitation();
+    }, [invitationId]);
+
+    const handleAcceptInvitation = async () => {
         setIsAccepting(true);
-        const res = await organization.acceptInvitation({
-            invitationId,
-        });
+        try {
+            const res = await organization.acceptInvitation({
+                invitationId,
+            });
 
-        if (res.error) {
-            toast.error(res.error.message || "Failed to accept invitation");
-            setIsAccepting(false);
-        } else {
+            if (res.error) {
+                toast.error(res.error.message || "Failed to accept invitation");
+                return;
+            }
+
             setStatus("accepted");
-            toast.success("Welcome to the organization!");
-            setTimeout(() => router.push("/"), 1500);
+            toast.success("Invitation accepted!");
+
+            setTimeout(() => {
+                router.push("/");
+                router.refresh();
+            }, 1000);
+        } catch (error) {
+            console.error("[handleAcceptInvitation] Error:", error);
+            toast.error("Failed to accept invitation");
+        } finally {
+            setIsAccepting(false);
         }
     };
 
-    const handleReject = async () => {
+    const handleRejectInvitation = async () => {
         setIsRejecting(true);
-        const res = await organization.rejectInvitation({
-            invitationId,
-        });
+        try {
+            const res = await organization.rejectInvitation({
+                invitationId,
+            });
 
-        if (res.error) {
-            toast.error(res.error.message || "Failed to decline invitation");
-            setIsRejecting(false);
-        } else {
+            if (res.error) {
+                toast.error(res.error.message || "Failed to decline invitation");
+                return;
+            }
+
             setStatus("rejected");
+            toast.success("Invitation declined");
+        } catch (error) {
+            console.error("[handleRejectInvitation] Error:", error);
+            toast.error("Failed to decline invitation");
+        } finally {
+            setIsRejecting(false);
         }
     };
 
-    // Already processed invitation
-    if (invitation.status !== "pending" && status === "pending") {
+    // Loading state
+    if (!invitation && !error) {
+        return <InvitationSkeleton />;
+    }
+
+    // Error state
+    if (error) {
         return (
-            <Card className="w-full max-w-md relative">
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle className="text-destructive">Error</CardTitle>
+                    <CardDescription>{error}</CardDescription>
+                </CardHeader>
+                <CardFooter>
+                    <Button onClick={() => router.push("/")}>Go to Dashboard</Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+
+    // Already processed
+    if (invitation && invitation.status !== "pending" && status === "pending") {
+        return (
+            <Card className="w-full max-w-md">
                 <CardHeader>
                     <CardTitle>Invitation Already Processed</CardTitle>
                     <CardDescription>
@@ -89,7 +146,7 @@ export function InvitationHandler({ invitation, invitationId }: InvitationHandle
     }
 
     return (
-        <Card className="w-full max-w-md relative">
+        <Card className="w-full max-w-md">
             <CardHeader>
                 <CardTitle>Organization Invitation</CardTitle>
                 <CardDescription>
@@ -97,22 +154,22 @@ export function InvitationHandler({ invitation, invitationId }: InvitationHandle
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {status === "pending" && (
+                {status === "pending" && invitation && (
                     <div className="space-y-4">
                         <p>
-                            <strong>{invitation.inviterEmail}</strong> has invited you to
-                            join <strong>{invitation.organizationName}</strong>.
+                            <span className="font-semibold italic">{invitation.inviterEmail}</span> has invited you to
+                            join <span className="font-semibold italic">{invitation.organizationName}</span>.
                         </p>
                         <p>
                             This invitation was sent to{" "}
-                            <strong>{invitation.email}</strong>.
+                            <span className="font-semibold italic">{invitation.email}</span>.
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Role: <span className="capitalize font-medium">{invitation.role}</span>
+                            Role: <span className="capitalize font-semibold">{invitation.role}</span>
                         </p>
                     </div>
                 )}
-                {status === "accepted" && (
+                {status === "accepted" && invitation && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-center w-16 h-16 mx-auto bg-primary/10 rounded-full">
                             <CheckIcon className="w-8 h-8 text-primary" />
@@ -125,7 +182,7 @@ export function InvitationHandler({ invitation, invitationId }: InvitationHandle
                         </p>
                     </div>
                 )}
-                {status === "rejected" && (
+                {status === "rejected" && invitation && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-center w-16 h-16 mx-auto bg-destructive/10 rounded-full">
                             <XIcon className="w-8 h-8 text-destructive" />
@@ -144,14 +201,14 @@ export function InvitationHandler({ invitation, invitationId }: InvitationHandle
                 <CardFooter className="flex justify-between">
                     <Button
                         variant="outline"
-                        onClick={handleReject}
+                        onClick={handleRejectInvitation}
                         disabled={isAccepting || isRejecting}
                     >
                         {isRejecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Decline
                     </Button>
                     <Button
-                        onClick={handleAccept}
+                        onClick={handleAcceptInvitation}
                         disabled={isAccepting || isRejecting}
                     >
                         {isAccepting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -159,6 +216,28 @@ export function InvitationHandler({ invitation, invitationId }: InvitationHandle
                     </Button>
                 </CardFooter>
             )}
+        </Card>
+    );
+}
+
+function InvitationSkeleton() {
+    return (
+        <Card className="w-full max-w-md">
+            <CardHeader>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64 mt-2" />
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-32" />
+                </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-32" />
+            </CardFooter>
         </Card>
     );
 }

@@ -10,6 +10,7 @@ import type { LoginState, SignupState } from "@/types";
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(1, "Password is required"),
+    callbackUrl: z.string().optional(),
 });
 
 const signupSchema = z.object({
@@ -17,6 +18,7 @@ const signupSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
+    callbackUrl: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
@@ -29,6 +31,7 @@ export async function loginAction(
     const validatedFields = loginSchema.safeParse({
         email: formData.get("email"),
         password: formData.get("password"),
+        callbackUrl: formData.get("callbackUrl"),
     });
 
     if (!validatedFields.success) {
@@ -37,11 +40,16 @@ export async function loginAction(
         };
     }
 
-    const { email, password } = validatedFields.data;
+    const { email, password, callbackUrl } = validatedFields.data;
 
     try {
         await auth.api.signInEmail({
-            body: { email, password, rememberMe: true, },
+            body: { 
+                email, 
+                password, 
+                rememberMe: true,
+                callbackURL: callbackUrl,
+            },
             headers: await headers(),
         });
 
@@ -53,8 +61,8 @@ export async function loginAction(
         };
     }
 
-    redirect("/");
-
+    // Redirect to callbackUrl or home
+    redirect(callbackUrl || "/");
 }
 
 export async function signupAction(
@@ -66,6 +74,7 @@ export async function signupAction(
         email: formData.get("email"),
         password: formData.get("password"),
         confirmPassword: formData.get("confirmPassword"),
+        callbackUrl: formData.get("callbackUrl"),
     });
 
     if (!validatedFields.success) {
@@ -74,14 +83,18 @@ export async function signupAction(
         };
     }
 
-    const { name, email, password } = validatedFields.data;
+    const { name, email, password, callbackUrl } = validatedFields.data;
 
     try {
         await auth.api.signUpEmail({
-            body: { name, email, password },
+            body: { 
+                name, 
+                email, 
+                password,
+                callbackURL: callbackUrl,
+            },
             headers: await headers()
         });
-
 
     } catch (error) {
         console.error("[signupAction] Error creating account:", error);
@@ -90,5 +103,6 @@ export async function signupAction(
         };
     }
 
-    redirect("/");
+    // Redirect to callbackUrl or home
+    redirect(callbackUrl || "/");
 }

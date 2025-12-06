@@ -25,11 +25,6 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
-      organizationHooks: {
-        afterCreateOrganization: async (data) => {
-          console.log("Organization created inside the hook:", data);
-        },
-      },
       accessControl: ac,
       roles: {
         owner,
@@ -42,7 +37,7 @@ export const auth = betterAuth({
           email: data.email,
           inviter: data.inviter.user.name,
           organization: data.organization.name,
-          inviteLink: `${process.env.BETTER_AUTH_URL}/invite/${data.id}`,
+          inviteLink: `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`,
         });
 
         // TODO: Implement actual email sending with Resend
@@ -87,11 +82,7 @@ export const auth = betterAuth({
             );
 
             const organizationId = result.rows[0]?.organizationId || null;
-            
-            if (organizationId) {
-              console.log(`Auto-setting activeOrganizationId for session ${session.id}: ${organizationId}`);
-            }
-            
+
             return {
               data: {
                 ...session,
