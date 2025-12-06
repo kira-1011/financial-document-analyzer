@@ -1,9 +1,7 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/server";
 import type { Database } from "@/types/supabase";
 
 export type Document = Database["public"]["Tables"]["documents"]["Row"];
-
-const supabase = createServerClient();
 
 export async function fetchDocuments(organizationId: string): Promise<Document[]> {
     try {
@@ -54,8 +52,6 @@ export interface DocumentStats {
 }
 
 export async function fetchDocumentStats(organizationId: string): Promise<DocumentStats> {
-    const supabase = createServerClient();
-    
     // Fetch all counts in parallel
     const [totalResult, completedResult, processingResult, pendingResult, failedResult] = await Promise.all([
         supabase
@@ -91,4 +87,58 @@ export async function fetchDocumentStats(organizationId: string): Promise<Docume
         pending: pendingResult.count || 0,
         failed: failedResult.count || 0,
     };
+}
+
+
+export async function uploadFileToStorage(filePath: string, file: File): Promise<boolean> {
+    try {
+        // Upload file to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+            .from("documents")
+            .upload(filePath, file, {
+                cacheControl: "3600",
+                upsert: false,
+            });
+
+        if (uploadError) {
+            console.error("[uploadDocument] Storage error:", uploadError);
+            throw new Error("Failed to upload file. Please try again.");
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error("[uploadFileToStorage] Error:", error);
+        throw error;
+    }
+}
+
+
+export async function createDocument(
+    {
+        id,
+        organizationId,
+        uploadedBy,
+        fileName,
+        filePath,
+        fileSize,
+        mimeType,
+        status,
+    }: Database["public"]["Tables"]["documents"]["Insert"]
+): Promise<void> {
+    const { error } = await supabase.from("documents").insert({
+        id,
+        organizationId,
+        uploadedBy,
+        fileName,
+        filePath,
+        fileSize,
+        mimeType,
+        status,
+    });
+
+    if (error) {
+        console.error("[createDocument] Database error:", error);
+        throw new Error("Failed to save document. Please try again.");
+    }
 }

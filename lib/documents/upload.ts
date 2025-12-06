@@ -1,9 +1,8 @@
 "use server";
 
-import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { createServerClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { tasks } from "@trigger.dev/sdk/v3";
 import {
@@ -12,6 +11,7 @@ import {
 } from "./constants";
 import type { UploadDocumentState } from "@/types";
 import { processDocument } from "@/trigger/process-document";
+import { createDocument, uploadFileToStorage } from "@/lib/documents/api";
 
 export async function uploadDocumentAction(
     prevState: UploadDocumentState,
@@ -73,46 +73,21 @@ export async function uploadDocumentAction(
     const filePath = `${activeOrg.id}/${documentId}/${file.name}`;
 
     try {
-        const supabase = createServerClient();
 
-        // Upload file to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-            .from("documents")
-            .upload(filePath, file, {
-                cacheControl: "3600",
-                upsert: false,
-            });
-
-        if (uploadError) {
-            console.error("[uploadDocument] Storage error:", uploadError);
-            return {
-                message: "Failed to upload file. Please try again.",
-            };
-        }
+        // upload file to storage
+        await uploadFileToStorage(filePath, file);
 
         // Insert document record into database (status: pending, no document_type yet)
-        const { error: dbError } = await supabase.from("documents").insert({
+        await createDocument({
             id: documentId,
-            organization_id: activeOrg.id,
-            uploaded_by: session.user.id,
-            file_name: file.name,
-            file_path: filePath,
-            file_size: file.size,
-            mime_type: file.type,
+            organizationId: activeOrg.id,
+            uploadedBy: session.user.id,
+            fileName: file.name,
+            filePath,
+            fileSize: file.size,
+            mimeType: file.type,
             status: "pending",
         });
-
-        if (dbError) {
-            console.error("[uploadDocument] Database error:", dbError);
-
-            // Clean up uploaded file if database insert fails
-            await supabase.storage.from("documents").remove([filePath]);
-
-            return {
-                message: "Failed to save document. Please try again.",
-            };
-        }
-
         // Trigger background processing task
         await tasks.trigger<typeof processDocument>("process-document", { documentId });
 

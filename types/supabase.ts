@@ -97,70 +97,70 @@ export type Database = {
       }
       documents: {
         Row: {
-          ai_model: string | null
-          created_at: string
-          document_type: Database["public"]["Enums"]["document_type"] | null
-          error_message: string | null
-          extracted_data: Json | null
-          extraction_confidence: number | null
-          file_name: string
-          file_path: string
-          file_size: number | null
+          aiModel: string | null
+          createdAt: string
+          documentType: Database["public"]["Enums"]["document_type"] | null
+          errorMessage: string | null
+          extractedData: Json | null
+          extractionConfidence: number | null
+          fileName: string
+          filePath: string
+          fileSize: number | null
           id: string
-          mime_type: string | null
-          organization_id: string
-          processed_at: string | null
+          mimeType: string | null
+          organizationId: string
+          processedAt: string | null
           status: Database["public"]["Enums"]["document_status"]
-          updated_at: string
-          uploaded_by: string
+          updatedAt: string
+          uploadedBy: string
         }
         Insert: {
-          ai_model?: string | null
-          created_at?: string
-          document_type?: Database["public"]["Enums"]["document_type"] | null
-          error_message?: string | null
-          extracted_data?: Json | null
-          extraction_confidence?: number | null
-          file_name: string
-          file_path: string
-          file_size?: number | null
+          aiModel?: string | null
+          createdAt?: string
+          documentType?: Database["public"]["Enums"]["document_type"] | null
+          errorMessage?: string | null
+          extractedData?: Json | null
+          extractionConfidence?: number | null
+          fileName: string
+          filePath: string
+          fileSize?: number | null
           id?: string
-          mime_type?: string | null
-          organization_id: string
-          processed_at?: string | null
+          mimeType?: string | null
+          organizationId: string
+          processedAt?: string | null
           status?: Database["public"]["Enums"]["document_status"]
-          updated_at?: string
-          uploaded_by: string
+          updatedAt?: string
+          uploadedBy: string
         }
         Update: {
-          ai_model?: string | null
-          created_at?: string
-          document_type?: Database["public"]["Enums"]["document_type"] | null
-          error_message?: string | null
-          extracted_data?: Json | null
-          extraction_confidence?: number | null
-          file_name?: string
-          file_path?: string
-          file_size?: number | null
+          aiModel?: string | null
+          createdAt?: string
+          documentType?: Database["public"]["Enums"]["document_type"] | null
+          errorMessage?: string | null
+          extractedData?: Json | null
+          extractionConfidence?: number | null
+          fileName?: string
+          filePath?: string
+          fileSize?: number | null
           id?: string
-          mime_type?: string | null
-          organization_id?: string
-          processed_at?: string | null
+          mimeType?: string | null
+          organizationId?: string
+          processedAt?: string | null
           status?: Database["public"]["Enums"]["document_status"]
-          updated_at?: string
-          uploaded_by?: string
+          updatedAt?: string
+          uploadedBy?: string
         }
         Relationships: [
           {
             foreignKeyName: "documents_organization_id_fkey"
-            columns: ["organization_id"]
+            columns: ["organizationId"]
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
+            columns: ["uploadedBy"]
             isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]
