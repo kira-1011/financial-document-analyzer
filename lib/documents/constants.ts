@@ -33,4 +33,4 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
 };
 
 
-export const AI_MODEL = "gemini-2.0-flash";
+export const AI_MODEL = "gemini-2.5-flash";

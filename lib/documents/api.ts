@@ -168,3 +168,21 @@ export async function updateDocument(
         throw error;
     }
 }
+
+export async function getSignedUrlForFile(filePath: string): Promise<string> {
+    try {
+        const { data, error } = await supabase.storage
+            .from("documents")
+            .createSignedUrl(filePath, 3600);
+
+        if (error) {
+            console.error("[getSignedUrlForFile] Error:", error);
+            throw new Error("Failed to get signed URL. Please try again.");
+        }
+
+        return data.signedUrl || "";
+    } catch (error) {
+        console.error("[getSignedUrlForFile] Error:", error);
+        throw error;
+    }
+}

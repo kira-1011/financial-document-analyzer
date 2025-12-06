@@ -1,7 +1,7 @@
 import { task } from "@trigger.dev/sdk/v3";
 import { extractDocument } from "@/lib/documents/extract";
 import { AI_MODEL } from "@/lib/documents/constants";
-import { fetchDocument, updateDocument } from "@/lib/documents/api";
+import { fetchDocument, updateDocument, getSignedUrlForFile } from "@/lib/documents/api";
 
 export const processDocument = task({
     id: "process-document",
@@ -13,9 +13,19 @@ export const processDocument = task({
             throw new Error(`Document not found: ${payload.documentId}`);
         }
 
+         // 2. Update status to processing
+         await updateDocument(payload.documentId, {
+            status: "processing",
+            processedAt: new Date().toISOString(),
+         });
+
         try {
+            // 3. Get signed URL for the file
+            const signedUrl = await getSignedUrlForFile(document.filePath);
+
+
             const { classification, extractedData } = await extractDocument(
-                document.filePath,
+                signedUrl,
                 document.mimeType || "application/pdf"
             );
 
