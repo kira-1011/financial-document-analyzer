@@ -69,7 +69,7 @@ export async function uploadDocumentAction(
     // Generate unique document ID
     const documentId = crypto.randomUUID();
 
-    // Create file path: {organization_id}/{document_id}/{filename}
+    // Create file path: {organizationId}/{documentId}/{filename}
     const filePath = `${activeOrg.id}/${documentId}/${file.name}`;
 
     try {

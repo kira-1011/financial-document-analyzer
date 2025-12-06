@@ -8,8 +8,8 @@ export async function fetchDocuments(organizationId: string): Promise<Document[]
         const { data, error } = await supabase
             .from("documents")
             .select("*")
-            .eq("organization_id", organizationId)
-            .order("created_at", { ascending: false });
+            .eq("organizationId", organizationId)
+            .order("createdAt", { ascending: false });
 
         if (error) {
             console.error("[fetchDocuments] Error:", error);
@@ -57,26 +57,26 @@ export async function fetchDocumentStats(organizationId: string): Promise<Docume
         supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
-            .eq("organization_id", organizationId),
+            .eq("organizationId", organizationId),
         supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
-            .eq("organization_id", organizationId)
+            .eq("organizationId", organizationId)
             .eq("status", "completed"),
         supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
-            .eq("organization_id", organizationId)
+            .eq("organizationId", organizationId)
             .eq("status", "processing"),
         supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
-            .eq("organization_id", organizationId)
+            .eq("organizationId", organizationId)
             .eq("status", "pending"),
         supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
-            .eq("organization_id", organizationId)
+            .eq("organizationId", organizationId)
             .eq("status", "failed"),
     ]);
 
@@ -144,6 +144,27 @@ export async function createDocument(
         }
     } catch (error) {
         console.error("[createDocument] Error:", error);
+        throw error;
+    }
+}
+
+
+export async function updateDocument(
+    id: Database["public"]["Tables"]["documents"]["Row"]["id"],
+    payload: Database["public"]["Tables"]["documents"]["Update"]
+): Promise<void> {
+    try {
+        const { error } = await supabase
+            .from("documents")
+            .update(payload)
+            .eq("id", id);
+
+        if (error) {
+            console.error("[updateDocument] Database error:", error);
+            throw new Error("Failed to update document. Please try again.");
+        }
+    } catch (error) {
+        console.error("[updateDocument] Error:", error);
         throw error;
     }
 }

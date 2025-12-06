@@ -1,8 +1,7 @@
 import { task } from "@trigger.dev/sdk/v3";
-import { supabase } from "@/lib/supabase/server";
 import { extractDocument } from "@/lib/documents/extract";
 import { AI_MODEL } from "@/lib/documents/constants";
-import { fetchDocument } from "@/lib/documents/api";
+import { fetchDocument, updateDocument } from "@/lib/documents/api";
 
 export const processDocument = task({
     id: "process-document",
@@ -21,17 +20,14 @@ export const processDocument = task({
             );
 
             // 5. Update with results
-            await supabase
-                .from("documents")
-                .update({
-                    documentType: classification.documentType,
-                    extracted_data: extractedData,
-                    extractionConfidence: classification.confidence,
-                    aiModel: AI_MODEL,
-                    status: "completed",
-                    processedAt: new Date().toISOString(),
-                })
-                .eq("id", payload.documentId);
+            await updateDocument(payload.documentId, {
+                documentType: classification.documentType,
+                extractedData: extractedData,
+                extractionConfidence: classification.confidence,
+                aiModel: AI_MODEL,
+                status: "completed",
+                processedAt: new Date().toISOString(),
+            });
 
             return {
                 success: true,
@@ -39,13 +35,10 @@ export const processDocument = task({
                 confidence: classification.confidence,
             };
         } catch (error) {
-            await supabase
-                .from("documents")
-                .update({
-                    status: "failed",
-                    error_message: error instanceof Error ? error.message : "Unknown error",
-                })
-                .eq("id", payload.documentId);
+            await updateDocument(payload.documentId, {
+                status: "failed",
+                errorMessage: error instanceof Error ? error.message : "Unexpected error",
+            });
             throw error;
         }
     },
