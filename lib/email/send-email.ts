@@ -1,7 +1,7 @@
 import { resend } from "./resend";
 import { reactInvitationEmail } from "@/components/email/invitation";
 
-const FROM_EMAIL = process.env.EMAIL_FROM || "onboarding@resend.dev";
+const FROM_EMAIL = process.env.EMAIL_FROM || "DocuFinance <onboarding@resend.dev>";
 
 interface SendEmailOptions {
     to: string | string[];
