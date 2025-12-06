@@ -88,3 +88,14 @@ export interface OrganizationFormProps {
   canManage: boolean;
   isOwner: boolean;
 }
+
+// Document Upload Types
+export type UploadDocumentState = {
+  success?: boolean;
+  message?: string;
+  documentId?: string;
+  errors?: {
+    file?: string[];
+    documentType?: string[];
+  };
+};
