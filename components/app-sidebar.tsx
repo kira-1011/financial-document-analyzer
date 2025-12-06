@@ -40,17 +40,7 @@ const data = {
     {
       title: "Settings",
       url: "/settings",
-      icon: Settings,
-      items: [
-        {
-          title: "Profile",
-          url: "/settings/profile",
-        },
-        {
-          title: "Organization",
-          url: "/settings/organization",
-        },
-      ],
+      icon: Settings
     },
   ],
   navSecondary: [

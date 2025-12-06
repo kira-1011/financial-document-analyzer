@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import {
-  BadgeCheck,
   ChevronsUpDown,
   LogOut,
-  Settings,
   User,
 } from "lucide-react"
 
@@ -104,10 +102,6 @@ export function NavUser({
               <DropdownMenuItem onClick={() => router.push("/settings/profile")}>
                 <User />
                 Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/settings")}>
-                <Settings />
-                Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

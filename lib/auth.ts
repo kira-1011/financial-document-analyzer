@@ -11,6 +11,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    deleteUser: {
+      enabled: true,
+      // Optional: Add cleanup before deletion
+      beforeDelete: async (user) => {
+        console.log(`Deleting user: ${user.email}`);
+        // Add any cleanup logic (e.g., delete user's documents, org cleanup)
+      },
+    },
+  },
   plugins: [
     organization({
       accessControl: ac,
