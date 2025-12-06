@@ -84,13 +84,13 @@ export function DocumentList({ documents }: DocumentListProps) {
                             <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-muted-foreground" />
-                                    <span className="truncate max-w-[200px]">{doc.file_name}</span>
+                                    <span className="truncate max-w-[200px]">{doc.fileName}</span>
                                 </div>
                             </TableCell>
                             <TableCell>
-                                {doc.document_type ? (
+                                {doc.documentType ? (
                                     <Badge variant="outline">
-                                        {DOCUMENT_TYPE_LABELS[doc.document_type as keyof typeof DOCUMENT_TYPE_LABELS] || doc.document_type}
+                                        {DOCUMENT_TYPE_LABELS[doc.documentType as keyof typeof DOCUMENT_TYPE_LABELS] || doc.documentType}
                                     </Badge>
                                 ) : (
                                     <span className="text-muted-foreground text-sm">-</span>
@@ -103,10 +103,10 @@ export function DocumentList({ documents }: DocumentListProps) {
                                 </Badge>
                             </TableCell>
                             <TableCell className="text-muted-foreground">
-                                {formatFileSize(doc.file_size)}
+                                {formatFileSize(doc.fileSize)}
                             </TableCell>
                             <TableCell className="text-muted-foreground">
-                                {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
                             </TableCell>
                         </TableRow>
                     ))}

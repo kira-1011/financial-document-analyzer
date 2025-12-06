@@ -126,19 +126,24 @@ export async function createDocument(
         status,
     }: Database["public"]["Tables"]["documents"]["Insert"]
 ): Promise<void> {
-    const { error } = await supabase.from("documents").insert({
-        id,
-        organizationId,
-        uploadedBy,
-        fileName,
-        filePath,
-        fileSize,
-        mimeType,
-        status,
-    });
+    try {
+        const { error } = await supabase.from("documents").insert({
+            id,
+            organizationId,
+            uploadedBy,
+            fileName,
+            filePath,
+            fileSize,
+            mimeType,
+            status,
+        });
 
-    if (error) {
-        console.error("[createDocument] Database error:", error);
-        throw new Error("Failed to save document. Please try again.");
+        if (error) {
+            console.error("[createDocument] Database error:", error);
+            throw new Error("Failed to save document. Please try again.");
+        }
+    } catch (error) {
+        console.error("[createDocument] Error:", error);
+        throw error;
     }
 }
