@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import {
   FileText,
   LayoutDashboard,
@@ -17,39 +16,27 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ModeToggle } from "./mode-toggle"
-import { OrganizationSwitcher } from "@/components/organization-switcher";
+import { OrganizationSwitcher } from "@/components/organization-switcher"
 
 const data = {
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: LayoutDashboard,
-      isActive: true,
-    },
-    {
-      title: "Documents",
-      url: "/documents",
-      icon: FileText,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings
-    },
+    { title: "Dashboard", url: "/", icon: LayoutDashboard, isActive: true },
+    { title: "Documents", url: "/documents", icon: FileText },
+    { title: "Settings", url: "/settings", icon: Settings },
   ],
   navSecondary: [
-    {
-      title: "Help & Support",
-      url: "/support",
-      icon: HelpCircle,
-    },
+    { title: "Help & Support", url: "/support", icon: HelpCircle },
   ]
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  createdAt: Date;
+  metadata?: Record<string, unknown> | null;
 }
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -58,13 +45,18 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     email: string
     image?: string | null
   }
+  organizations: Organization[]
+  activeOrganization: Organization | null
 }
 
-export function AppSidebar({ user, ...props }: AppSidebarProps) {
+export function AppSidebar({ user, organizations, activeOrganization, ...props }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
-        <OrganizationSwitcher />
+        <OrganizationSwitcher 
+          organizations={organizations}
+          activeOrganization={activeOrganization}
+        />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

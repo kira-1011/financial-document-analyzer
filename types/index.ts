@@ -1,3 +1,6 @@
+import type { Sidebar } from "@/components/ui/sidebar";
+import type { Organization , ActiveOrganization, User} from "@/lib/auth-types";
+
 // Auth Types
 export type LoginState = {
   errors?: {
@@ -46,3 +49,18 @@ export type DeleteAccountState = {
   };
 };
 
+// Component Props Types
+export interface OrganizationSwitcherProps {
+  organizations: Organization[];
+  activeOrganization: ActiveOrganization | null;
+}
+
+export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: User;
+  organizations: Organization[];
+  activeOrganization: ActiveOrganization | null;
+}
+
+export interface ProfileFormProps {
+  user: User;
+}

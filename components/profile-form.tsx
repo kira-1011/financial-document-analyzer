@@ -31,16 +31,9 @@ import {
     updateProfileAction,
     changePasswordAction,
     deleteAccountAction,
-} from "@/app/settings/profile/actions";
+} from "@/app/(dashboard)/settings/profile/actions";
+import type { ProfileFormProps } from "@/types";
 
-interface ProfileFormProps {
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        image?: string | null;
-    };
-}
 
 export function ProfileForm({ user }: ProfileFormProps) {
     const router = useRouter();

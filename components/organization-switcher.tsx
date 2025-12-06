@@ -17,17 +17,30 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { organization, useListOrganizations, useActiveOrganization } from "@/lib/auth-client";
+import { organization } from "@/lib/auth-client";
 import { toast } from "sonner";
 
-export function OrganizationSwitcher() {
+interface Organization {
+    id: string;
+    name: string;
+    slug: string;
+    logo?: string | null;
+    createdAt: Date;
+    metadata?: Record<string, unknown> | null;
+}
+
+interface OrganizationSwitcherProps {
+    organizations: Organization[];
+    activeOrganization: Organization | null;
+}
+
+export function OrganizationSwitcher({ 
+    organizations, 
+    activeOrganization 
+}: OrganizationSwitcherProps) {
     const { isMobile } = useSidebar();
     const router = useRouter();
     const [isPending, setIsPending] = React.useState(false);
-
-    const { data: organizations, isPending: isLoadingOrgs } = useListOrganizations();
-    const { data: activeOrganization, isPending: isLoadingActive } = useActiveOrganization();
 
     const handleSwitch = async (orgId: string) => {
         if (orgId === activeOrganization?.id) return;
@@ -43,23 +56,6 @@ export function OrganizationSwitcher() {
             setIsPending(false);
         }
     };
-
-    // Loading state with Skeleton
-    if (isLoadingOrgs || isLoadingActive) {
-        return (
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" disabled>
-                        <Skeleton className="size-8 rounded-lg" />
-                        <div className="grid flex-1 gap-1">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-3 w-16" />
-                        </div>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        );
-    }
 
     // No organizations
     if (!organizations || organizations.length === 0) {
