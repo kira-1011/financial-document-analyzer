@@ -3,6 +3,7 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { bankStatementSchema, invoiceSchema, receiptSchema } from "./schemas";
 import { ROUTER_SYSTEM_PROMPT, EXTRACTION_PROMPTS } from "./prompts";
+import { AI_MODEL } from "./constants";
 
 // ============================================
 // Router Classification Schema
@@ -46,7 +47,7 @@ function createDocumentPart(fileUrl: string, mimeType: string) {
 // ============================================
 export async function extractDocument(fileUrl: string, mimeType: string) {
     const documentPart = createDocumentPart(fileUrl, mimeType);
-    const model = google("gemini-2.0-flash");
+    const model = google(AI_MODEL);
 
     // Step 1: Classify the document
     const { object: classification } = await generateObject({

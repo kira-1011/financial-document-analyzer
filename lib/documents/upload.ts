@@ -5,17 +5,13 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { tasks } from "@trigger.dev/sdk/v3";
 import {
-    DOCUMENT_TYPES,
     ALLOWED_MIME_TYPES,
     MAX_FILE_SIZE,
 } from "./constants";
 import type { UploadDocumentState } from "@/types";
-
-// Validation schema for document upload
-const uploadSchema = z.object({
-    documentType: z.enum(DOCUMENT_TYPES),
-});
+import { processDocument } from "@/trigger/process-document";
 
 export async function uploadDocumentAction(
     prevState: UploadDocumentState,
@@ -23,7 +19,6 @@ export async function uploadDocumentAction(
 ): Promise<UploadDocumentState> {
     // Get the file from form data
     const file = formData.get("file") as File | null;
-    const documentType = formData.get("documentType") as string;
 
     // Validate file exists
     if (!file || file.size === 0) {
@@ -46,16 +41,6 @@ export async function uploadDocumentAction(
         return {
             errors: {
                 file: ["File size exceeds 10MB limit"],
-            },
-        };
-    }
-
-    // Validate document type
-    const validatedFields = uploadSchema.safeParse({ documentType });
-    if (!validatedFields.success) {
-        return {
-            errors: {
-                documentType: ["Please select a document type"],
             },
         };
     }
@@ -105,7 +90,7 @@ export async function uploadDocumentAction(
             };
         }
 
-        // Insert document record into database
+        // Insert document record into database (status: pending, no document_type yet)
         const { error: dbError } = await supabase.from("documents").insert({
             id: documentId,
             organization_id: activeOrg.id,
@@ -114,7 +99,6 @@ export async function uploadDocumentAction(
             file_path: filePath,
             file_size: file.size,
             mime_type: file.type,
-            document_type: validatedFields.data.documentType,
             status: "pending",
         });
 
@@ -129,12 +113,15 @@ export async function uploadDocumentAction(
             };
         }
 
+        // Trigger background processing task
+        await tasks.trigger<typeof processDocument>("process-document", { documentId });
+
         // Revalidate documents page
         revalidatePath("/documents");
 
         return {
             success: true,
-            message: "Document uploaded successfully",
+            message: "Document uploaded successfully. Processing started.",
             documentId,
         };
     } catch (error) {

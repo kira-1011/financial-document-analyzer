@@ -99,7 +99,7 @@ export type Database = {
         Row: {
           ai_model: string | null
           created_at: string
-          document_type: Database["public"]["Enums"]["document_type"]
+          document_type: Database["public"]["Enums"]["document_type"] | null
           error_message: string | null
           extracted_data: Json | null
           extraction_confidence: number | null
@@ -117,7 +117,7 @@ export type Database = {
         Insert: {
           ai_model?: string | null
           created_at?: string
-          document_type: Database["public"]["Enums"]["document_type"]
+          document_type?: Database["public"]["Enums"]["document_type"] | null
           error_message?: string | null
           extracted_data?: Json | null
           extraction_confidence?: number | null
@@ -135,7 +135,7 @@ export type Database = {
         Update: {
           ai_model?: string | null
           created_at?: string
-          document_type?: Database["public"]["Enums"]["document_type"]
+          document_type?: Database["public"]["Enums"]["document_type"] | null
           error_message?: string | null
           extracted_data?: Json | null
           extraction_confidence?: number | null
