@@ -32,3 +32,5 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
     failed: "Failed",
 };
 
+
+export const AI_MODEL = "gemini-2.0-flash";
