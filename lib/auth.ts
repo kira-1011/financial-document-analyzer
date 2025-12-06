@@ -3,6 +3,7 @@ import { organization, } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { Pool } from "pg";
 import { ac, owner, admin, member } from "@/lib/permissions";
+import { sendInvitationEmail } from "@/lib/email/send-email";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -32,20 +33,16 @@ export const auth = betterAuth({
         member,
       },
       sendInvitationEmail: async (data) => {
-        // For now, just log - implement email later
-        console.log("Invitation email:", {
-          email: data.email,
-          inviter: data.inviter.user.name,
-          organization: data.organization.name,
-          inviteLink: `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`,
-        });
+        const inviteLink = `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
 
-        // TODO: Implement actual email sending with Resend
-        // await sendEmail({
-        //   to: data.email,
-        //   subject: `You've been invited to ${data.organization.name}`,
-        //   html: `...`
-        // });
+        await sendInvitationEmail({
+            email: data.email,
+            inviterName: data.inviter.user.name,
+            inviterEmail: data.inviter.user.email,
+            organizationName: data.organization.name,
+            organizationLogo: data.organization.logo || undefined,
+            inviteLink,
+        });
       },
     }),
     nextCookies(),

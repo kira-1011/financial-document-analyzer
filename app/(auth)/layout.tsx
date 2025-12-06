@@ -1,6 +1,7 @@
 import { CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { ModeToggle } from "@/components/mode-toggle";
+import { Brand } from "@/components/brand";
 
 export default function AuthLayout({
     children,
@@ -23,17 +24,9 @@ export default function AuthLayout({
             <div className="hidden lg:flex lg:w-1/2 bg-muted relative overflow-hidden">
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
                     <div className="mb-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Image
-                                src="/docu-finance-logo.svg"
-                                alt="DocuFinance Logo"
-                                width={48}
-                                height={48}
-                                className="w-12 h-12"
-                            />
-                            <span className="text-2xl font-bold text-foreground tracking-tight">
-                                DocuFinance
-                            </span>
+                        {/* Use Brand component */}
+                        <div className="mb-6">
+                            <Brand size="lg" asLink={false} />
                         </div>
                         <h1 className="text-4xl xl:text-5xl font-bold text-foreground leading-tight mb-4">
                             AI-Powered Financial
