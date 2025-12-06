@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { fetchDocumentStats } from "@/lib/documents/api";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -18,10 +19,19 @@ export default async function Home() {
         headers: await headers(),
     });
 
+    const activeOrg = await auth.api.getFullOrganization({
+        headers: await headers(),
+    });
+
+    // Fetch document stats if org is active
+    const docStats = activeOrg 
+        ? await fetchDocumentStats(activeOrg.id) 
+        : { total: 0, completed: 0, processing: 0, pending: 0, failed: 0 };
+
     const stats = [
-        { title: "Total Documents", value: "0", description: "Documents uploaded", icon: FileText },
-        { title: "Processed", value: "0", description: "Successfully extracted", icon: CheckCircle },
-        { title: "Processing", value: "0", description: "Currently analyzing", icon: Clock },
+        { title: "Total Documents", value: docStats.total.toString(), description: "Documents uploaded", icon: FileText },
+        { title: "Processed", value: docStats.completed.toString(), description: "Successfully extracted", icon: CheckCircle },
+        { title: "Processing", value: (docStats.processing + docStats.pending).toString(), description: "Currently analyzing", icon: Clock },
     ];
 
     return (

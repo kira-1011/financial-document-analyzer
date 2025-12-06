@@ -44,3 +44,51 @@ export async function fetchDocument(documentId: string): Promise<Document | null
         throw error;
     }
 }
+
+export interface DocumentStats {
+    total: number;
+    completed: number;
+    processing: number;
+    pending: number;
+    failed: number;
+}
+
+export async function fetchDocumentStats(organizationId: string): Promise<DocumentStats> {
+    const supabase = createServerClient();
+    
+    // Fetch all counts in parallel
+    const [totalResult, completedResult, processingResult, pendingResult, failedResult] = await Promise.all([
+        supabase
+            .from("documents")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", organizationId),
+        supabase
+            .from("documents")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("status", "completed"),
+        supabase
+            .from("documents")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("status", "processing"),
+        supabase
+            .from("documents")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("status", "pending"),
+        supabase
+            .from("documents")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", organizationId)
+            .eq("status", "failed"),
+    ]);
+
+    return {
+        total: totalResult.count || 0,
+        completed: completedResult.count || 0,
+        processing: processingResult.count || 0,
+        pending: pendingResult.count || 0,
+        failed: failedResult.count || 0,
+    };
+}
