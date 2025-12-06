@@ -37,13 +37,13 @@ export function DocumentList({ documents }: DocumentListProps) {
     const getStatusIcon = (status: string) => {
         switch (status) {
             case "completed":
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
+                return <CheckCircle className="h-4 w-4" />;
             case "failed":
-                return <XCircle className="h-4 w-4 text-red-500" />;
+                return <XCircle className="h-4 w-4" />;
             case "processing":
-                return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+                return <Loader2 className="h-4 w-4 animate-spin" />;
             default:
-                return <Clock className="h-4 w-4 text-yellow-500" />;
+                return <Clock className="h-4 w-4" />;
         }
     };
 

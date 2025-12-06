@@ -5,8 +5,6 @@ import { formatDistanceToNow, format } from "date-fns";
 import {
     ArrowLeft,
     FileText,
-    Download,
-    RefreshCw,
     CheckCircle,
     XCircle,
     Clock,
@@ -138,24 +136,14 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    {fileUrl && (
-                        <Button variant="outline" size="sm" asChild>
-                            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                View Original
-                            </a>
-                        </Button>
-                    )}
-                    <Button variant="outline" size="sm" disabled>
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Reprocess
+                {fileUrl && (
+                    <Button variant="outline" size="sm" asChild>
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View Original
+                        </a>
                     </Button>
-                    <Button variant="outline" size="sm" disabled>
-                        <Download className="h-4 w-4 mr-2" />
-                        Export
-                    </Button>
-                </div>
+                )}
             </div>
 
             {/* Error Message */}
@@ -174,11 +162,11 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
             )}
 
             {/* Main Content */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="bg-background border">
-                    <TabsTrigger value="extracted">Extracted Data</TabsTrigger>
-                    <TabsTrigger value="preview">Document Preview</TabsTrigger>
-                    <TabsTrigger value="raw">Raw JSON</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="border bg-background">
+                    <TabsTrigger value="extracted" className="hover:text-primary!">Extracted Data</TabsTrigger>
+                    <TabsTrigger value="preview" className="hover:text-primary!">Document Preview</TabsTrigger>
+                    <TabsTrigger value="raw" className="hover:text-primary!">Raw JSON</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="extracted" className="space-y-4">
@@ -242,7 +230,7 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
             {/* Metadata */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Document Information</CardTitle>
+                    <CardTitle>Document Metadata</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
