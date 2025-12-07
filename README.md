@@ -226,24 +226,11 @@ pnpm dlx trigger.dev@latest deploy
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting a Pull Request.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Vercel AI SDK](https://sdk.vercel.ai/) for the excellent AI integration
-- [Better Auth](https://better-auth.com/) for authentication
-- [shadcn/ui](https://ui.shadcn.com/) for beautiful components
-- [Trigger.dev](https://trigger.dev/) for reliable background jobs
 
 ---
 
