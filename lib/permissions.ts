@@ -1,35 +1,35 @@
 import { createAccessControl } from "better-auth/plugins/access";
+import { 
+    defaultStatements, 
+    adminAc, 
+    memberAc, 
+    ownerAc 
+} from "better-auth/plugins/organization/access";
 
 /**
- * Define permissions for documents AND organization
+ * Define custom permissions extending Better Auth defaults
  */
 const statement = {
-  document: ["create", "read", "update", "delete", "process"],
-  organization: ["update", "delete"],
-  member: ["create", "update", "delete"],
-  invitation: ["create", "cancel"],
+    ...defaultStatements,
+    document: ["create", "read", "update", "delete", "process"],
 } as const;
 
 export const ac = createAccessControl(statement);
 
 /**
- * Role definitions
+ * Role definitions - extend default roles with custom permissions
  */
 export const member = ac.newRole({
-  document: ["create", "read"],
-  // Members can't manage org/members/invitations
+    ...memberAc.statements,
+    document: ["create", "read"],
 });
 
 export const admin = ac.newRole({
-  document: ["create", "read", "update", "process"],
-  organization: ["update"],
-  member: ["create", "update"],
-  invitation: ["create", "cancel"],
+    ...adminAc.statements,
+    document: ["create", "read", "update", "process"],
 });
 
 export const owner = ac.newRole({
-  document: ["create", "read", "update", "delete", "process"],
-  organization: ["update", "delete"],
-  member: ["create", "update", "delete"],
-  invitation: ["create", "cancel"],
+    ...ownerAc.statements,
+    document: ["create", "read", "update", "delete", "process"],
 });

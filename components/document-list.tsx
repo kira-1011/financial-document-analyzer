@@ -3,9 +3,27 @@
 import { useState, useEffect } from "react";
 import { usePolling } from "@/hooks/use-polling";
 import { fetchDocumentStatuses, type DocumentStatus } from "@/lib/documents/api-client";
+import { organization } from "@/lib/auth-client";
 import Link from "next/link";
-import { FileText, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
     Table,
     TableBody,
@@ -15,7 +33,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 import { DOCUMENT_TYPE_LABELS, DOCUMENT_STATUS_LABELS } from "@/lib/documents/constants";
+import { deleteDocumentAction } from "@/lib/documents/actions";
 import type { Database } from "@/types/supabase";
 
 type Document = Database["public"]["Tables"]["documents"]["Row"];
@@ -29,6 +49,29 @@ const POLLING_INTERVAL = 20000;
 
 export function DocumentList({ initialDocuments, organizationId }: DocumentListProps) {
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [canDeleteDocuments, setCanDeleteDocuments] = useState(false);
+
+    // Check delete permission on mount
+    useEffect(() => {
+        const checkPermission = async () => {
+            try {
+                const result = await organization.hasPermission({
+                    permissions: {
+                        document: ["delete"],
+                    } as Record<string, string[]>,
+                });
+                setCanDeleteDocuments(result.data?.success ?? false);
+            } catch (error) {
+                console.error("Failed to check permission:", error);
+                setCanDeleteDocuments(false);
+            }
+        };
+        
+        checkPermission();
+    }, []);
 
     const { data: statuses } = usePolling<DocumentStatus[]>({
         fetcher: () => fetchDocumentStatuses(organizationId),
@@ -47,6 +90,32 @@ export function DocumentList({ initialDocuments, organizationId }: DocumentListP
             })
         );
     }, [statuses]);
+
+    // Delete handlers
+    const handleDeleteClick = (e: React.MouseEvent, doc: Document) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDocumentToDelete(doc);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!documentToDelete) return;
+        
+        setIsDeleting(true);
+        const result = await deleteDocumentAction(documentToDelete.id);
+        setIsDeleting(false);
+        
+        if (result.success) {
+            toast.success("Document deleted successfully");
+            setDocuments((prev) => prev.filter((d) => d.id !== documentToDelete.id));
+        } else {
+            toast.error(result.error || "Failed to delete document");
+        }
+        
+        setDeleteDialogOpen(false);
+        setDocumentToDelete(null);
+    };
 
     if (documents.length === 0) {
         return (
@@ -94,59 +163,109 @@ export function DocumentList({ initialDocuments, organizationId }: DocumentListP
     };
 
     return (
-        <div className="border rounded-lg">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>File Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Size</TableHead>
-                        <TableHead>Uploaded</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {documents.map((doc) => (
-                        <TableRow 
-                            key={doc.id} 
-                            className="relative hover:bg-muted/50"
-                        >
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                    <Link 
-                                        href={`/documents/${doc.id}`}
-                                        className="truncate max-w-[200px] after:absolute after:inset-0"
-                                    >
-                                        {doc.fileName}
-                                    </Link>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                {doc.documentType ? (
-                                    <Badge variant="outline">
-                                        {DOCUMENT_TYPE_LABELS[doc.documentType as keyof typeof DOCUMENT_TYPE_LABELS] || doc.documentType}
-                                    </Badge>
-                                ) : (
-                                    <span className="text-muted-foreground text-sm">-</span>
-                                )}
-                            </TableCell>
-                            <TableCell>
-                                <Badge variant={getStatusBadgeVariant(doc.status)} className="gap-1">
-                                    {getStatusIcon(doc.status)}
-                                    {DOCUMENT_STATUS_LABELS[doc.status as keyof typeof DOCUMENT_STATUS_LABELS] || doc.status}
-                                </Badge>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                                {formatFileSize(doc.fileSize)}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                                {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
-                            </TableCell>
+        <>
+            <div className="border rounded-lg">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>File Name</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Size</TableHead>
+                            <TableHead>Uploaded</TableHead>
+                            {canDeleteDocuments && <TableHead className="w-[50px]"></TableHead>}
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
+                    </TableHeader>
+                    <TableBody>
+                        {documents.map((doc) => (
+                            <TableRow 
+                                key={doc.id} 
+                                className="relative hover:bg-muted/50"
+                            >
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-muted-foreground" />
+                                        <Link 
+                                            href={`/documents/${doc.id}`}
+                                            className="truncate max-w-[200px] after:absolute after:inset-0"
+                                        >
+                                            {doc.fileName}
+                                        </Link>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    {doc.documentType ? (
+                                        <Badge variant="outline">
+                                            {DOCUMENT_TYPE_LABELS[doc.documentType as keyof typeof DOCUMENT_TYPE_LABELS] || doc.documentType}
+                                        </Badge>
+                                    ) : (
+                                        <span className="text-muted-foreground text-sm">-</span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={getStatusBadgeVariant(doc.status)} className="gap-1">
+                                        {getStatusIcon(doc.status)}
+                                        {DOCUMENT_STATUS_LABELS[doc.status as keyof typeof DOCUMENT_STATUS_LABELS] || doc.status}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground">
+                                    {formatFileSize(doc.fileSize)}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground">
+                                    {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                                </TableCell>
+                                {canDeleteDocuments && (
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon"
+                                                    className="h-8 w-8 relative z-10"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem 
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={(e) => handleDeleteClick(e, doc)}
+                                                >
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                )}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete &quot;{documentToDelete?.fileName}&quot;? 
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeleteConfirm}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }

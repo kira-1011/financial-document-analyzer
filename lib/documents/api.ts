@@ -114,6 +114,15 @@ export async function uploadFileToStorage(filePath: string, file: File): Promise
 }
 
 
+const deleteFileFromStorage = async (filePath: string): Promise<void> => {
+    try {
+        await supabase.storage.from("documents").remove([filePath]);
+    } catch (error) {
+        console.error("[deleteFileFromStorage] Error:", error);
+        throw error;
+    }
+}
+
 export async function createDocument(
     {
         id,
@@ -183,6 +192,32 @@ export async function getSignedUrlForFile(filePath: string): Promise<string> {
         return data.signedUrl || "";
     } catch (error) {
         console.error("[getSignedUrlForFile] Error:", error);
+        throw error;
+    }
+}
+
+export async function deleteDocument(documentId: string): Promise<void> {
+
+    try {
+        // Delete from storage first
+        const document = await fetchDocument(documentId);
+        if (document?.filePath) {
+            await deleteFileFromStorage(document.filePath);
+        }
+
+        // Delete from database
+        const { error } = await supabase
+            .from("documents")
+            .delete()
+            .eq("id", documentId);
+
+        if (error) {
+            console.error("[deleteDocument] Error:", error);
+            throw new Error("Failed to delete document");
+        }
+
+    } catch (error) {
+        console.error("[deleteDocument] Error:", error);
         throw error;
     }
 }
