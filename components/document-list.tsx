@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { usePolling } from "@/hooks/use-polling";
+import { fetchDocumentStatuses, type DocumentStatus } from "@/lib/documents/api-client";
 import Link from "next/link";
 import { FileText, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +21,31 @@ import type { Database } from "@/types/supabase";
 type Document = Database["public"]["Tables"]["documents"]["Row"];
 
 interface DocumentListProps {
-    documents: Document[];
+    initialDocuments: Document[];
+    organizationId: string;
 }
 
-export function DocumentList({ documents }: DocumentListProps) {
+export function DocumentList({ initialDocuments, organizationId }: DocumentListProps) {
+    const [documents, setDocuments] = useState<Document[]>(initialDocuments);
+
+    const { data: statuses } = usePolling<DocumentStatus[]>({
+        fetcher: () => fetchDocumentStatuses(organizationId),
+        interval: 10000,
+        enabled: true,
+    });
+
+    // Merge status updates into documents
+    useEffect(() => {
+        if (!statuses) return;
+        
+        setDocuments((prev) =>
+            prev.map((doc) => {
+                const updated = statuses.find((s) => s.id === doc.id);
+                return updated ? { ...doc, ...updated } : doc;
+            })
+        );
+    }, [statuses]);
+
     if (documents.length === 0) {
         return (
             <div className="text-center py-12 border rounded-lg bg-muted/20">

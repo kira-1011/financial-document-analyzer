@@ -67,7 +67,7 @@ export default async function DocumentsPage() {
                     <UploadDocumentDialog />
                 </div>
 
-                <DocumentList documents={documents} />
+                <DocumentList initialDocuments={documents} organizationId={activeOrg.id} />
             </div>
         </>
     );
