@@ -33,4 +33,4 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
 };
 
 
-export const AI_MODEL = "gemini-2.5-flash-lite";
+export const AI_MODEL = process.env.AI_MODEL || "gemini-2.5-flash-lite";
