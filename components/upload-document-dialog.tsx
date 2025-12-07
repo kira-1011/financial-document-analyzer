@@ -17,8 +17,10 @@ import { toast } from "sonner";
 import { uploadDocumentAction } from "@/lib/documents/upload";
 import { MAX_FILE_SIZE } from "@/lib/documents/constants";
 import type { UploadDocumentState } from "@/types";
+import { useRouter } from "next/navigation";
 
 export function UploadDocumentDialog() {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
 
@@ -58,12 +60,13 @@ export function UploadDocumentDialog() {
             toast.success(state.message);
             setFile(null);
             setOpen(false);
+            router.refresh();
         } else if (state.message && !state.success) {
             toast.error(state.message);
         } else if (state.errors?.file) {
             toast.error(state.errors.file[0]);
         }
-    }, [state]);
+    }, [state, router]);
 
     // Handle file rejections from dropzone
     useEffect(() => {
