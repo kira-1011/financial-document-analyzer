@@ -21,9 +21,14 @@ interface InvoiceViewProps {
 
 export function InvoiceView({ data }: InvoiceViewProps) {
     const formatCurrency = (amount: number) => {
+        // Handle invalid currency codes (symbols like "$" instead of "USD")
+        const currencyCode = data.currency && data.currency.length === 3 
+            ? data.currency 
+            : "USD";
+        
         return new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: data.currency || "USD",
+            currency: currencyCode,
         }).format(amount);
     };
 
