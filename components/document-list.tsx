@@ -54,6 +54,11 @@ export function DocumentList({ initialDocuments, organizationId }: DocumentListP
     const [isDeleting, setIsDeleting] = useState(false);
     const [canDeleteDocuments, setCanDeleteDocuments] = useState(false);
 
+    // Sync when initialDocuments prop changes (after router.refresh())
+    useEffect(() => {
+        setDocuments(initialDocuments);
+    }, [initialDocuments]);
+
     // Check delete permission on mount
     useEffect(() => {
         const checkPermission = async () => {
