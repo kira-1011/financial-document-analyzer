@@ -25,12 +25,14 @@ interface DocumentListProps {
     organizationId: string;
 }
 
+const POLLING_INTERVAL = 20000;
+
 export function DocumentList({ initialDocuments, organizationId }: DocumentListProps) {
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
 
     const { data: statuses } = usePolling<DocumentStatus[]>({
         fetcher: () => fetchDocumentStatuses(organizationId),
-        interval: 10000,
+        interval: POLLING_INTERVAL,
         enabled: true,
     });
 

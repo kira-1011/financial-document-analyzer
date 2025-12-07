@@ -10,7 +10,7 @@ interface UsePollingOptions<T> {
 
 export function usePolling<T>({
     fetcher,
-    interval = 5000,
+    interval = 10000,
     enabled = true,
 }: UsePollingOptions<T>) {
     const [data, setData] = useState<T | null>(null);

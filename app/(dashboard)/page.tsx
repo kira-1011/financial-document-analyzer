@@ -10,9 +10,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Upload, CheckCircle, Clock, Plus } from "lucide-react";
+import { FileText, Upload, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
+import { UploadDocumentDialog } from "@/components/upload-document-dialog";
 
 export default async function Home() {
     const session = await auth.api.getSession({
@@ -58,12 +58,7 @@ export default async function Home() {
                             Upload and analyze your financial documents with AI
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/documents/upload">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Upload Document
-                        </Link>
-                    </Button>
+                    <UploadDocumentDialog />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
