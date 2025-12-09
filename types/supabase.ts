@@ -391,7 +391,7 @@ export type Database = {
     }
     Enums: {
       document_status: "pending" | "processing" | "completed" | "failed"
-      document_type: "bank_statement" | "invoice" | "receipt"
+      document_type: "bank_statement" | "invoice" | "receipt" | "unknown"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -523,7 +523,7 @@ export const Constants = {
   public: {
     Enums: {
       document_status: ["pending", "processing", "completed", "failed"],
-      document_type: ["bank_statement", "invoice", "receipt"],
+      document_type: ["bank_statement", "invoice", "receipt", "unknown"],
     },
   },
 } as const
