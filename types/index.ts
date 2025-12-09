@@ -1,11 +1,5 @@
 import type { Sidebar } from '@/components/ui/sidebar';
-import type {
-  Organization,
-  ActiveOrganization,
-  User,
-  Invitation,
-  Member,
-} from '@/lib/auth-types';
+import type { Organization, ActiveOrganization, User, Invitation, Member } from '@/lib/auth-types';
 
 // Auth Types
 export type LoginState = {
