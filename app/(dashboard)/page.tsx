@@ -82,7 +82,7 @@ export default async function Home() {
                         <CardDescription>Get started by uploading your first document</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-4 md:grid-cols-3">
+                        <div className="grid gap-4 md:grid-cols-2">
                             <Link href="/documents/upload" className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/50 transition-colors">
                                 <div className="rounded-full bg-primary p-3">
                                     <Upload className="h-6 w-6 text-primary-foreground" />
@@ -96,13 +96,6 @@ export default async function Home() {
                                 </div>
                                 <p className="font-medium">View Documents</p>
                                 <p className="text-sm text-muted-foreground">Browse all documents</p>
-                            </Link>
-                            <Link href="/search" className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/50 transition-colors">
-                                <div className="rounded-full bg-primary p-3">
-                                    <CheckCircle className="h-6 w-6 text-primary-foreground" />
-                                </div>
-                                <p className="font-medium">Search Documents</p>
-                                <p className="text-sm text-muted-foreground">Find extracted data</p>
                             </Link>
                         </div>
                     </CardContent>
