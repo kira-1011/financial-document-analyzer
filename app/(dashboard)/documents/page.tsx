@@ -38,6 +38,16 @@ export default async function DocumentsPage() {
 
     const documents = await fetchDocuments(activeOrg.id);
 
+    // Check delete permission on server
+    const canDelete = await auth.api.hasPermission({
+        headers: await headers(),
+        body: {
+            permissions: {
+                document: ["delete"],
+            },
+        },
+    });
+
     return (
         <>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -67,7 +77,11 @@ export default async function DocumentsPage() {
                     <UploadDocumentDialog />
                 </div>
 
-                <DocumentList initialDocuments={documents} organizationId={activeOrg.id} />
+                <DocumentList 
+                    initialDocuments={documents} 
+                    organizationId={activeOrg.id}
+                    canDelete={canDelete?.success ?? false}
+                />
             </div>
         </>
     );

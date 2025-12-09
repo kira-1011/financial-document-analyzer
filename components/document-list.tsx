@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { usePolling } from "@/hooks/use-polling";
 import { fetchDocumentStatuses, type DocumentStatus } from "@/lib/documents/api-client";
-import { organization } from "@/lib/auth-client";
 import Link from "next/link";
 import { FileText, Clock, CheckCircle, XCircle, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -43,40 +42,21 @@ type Document = Database["public"]["Tables"]["documents"]["Row"];
 interface DocumentListProps {
     initialDocuments: Document[];
     organizationId: string;
+    canDelete: boolean;
 }
 
 const POLLING_INTERVAL = 20000;
 
-export function DocumentList({ initialDocuments, organizationId }: DocumentListProps) {
+export function DocumentList({ initialDocuments, organizationId, canDelete }: DocumentListProps) {
     const [documents, setDocuments] = useState<Document[]>(initialDocuments);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [canDeleteDocuments, setCanDeleteDocuments] = useState(false);
 
     // Sync when initialDocuments prop changes (after router.refresh())
     useEffect(() => {
         setDocuments(initialDocuments);
     }, [initialDocuments]);
-
-    // Check delete permission on mount
-    useEffect(() => {
-        const checkPermission = async () => {
-            try {
-                const result = await organization.hasPermission({
-                    permissions: {
-                        document: ["delete"],
-                    } as Record<string, string[]>,
-                });
-                setCanDeleteDocuments(result.data?.success ?? false);
-            } catch (error) {
-                console.error("Failed to check permission:", error);
-                setCanDeleteDocuments(false);
-            }
-        };
-        
-        checkPermission();
-    }, []);
 
     const { data: statuses } = usePolling<DocumentStatus[]>({
         fetcher: () => fetchDocumentStatuses(organizationId),
@@ -178,7 +158,7 @@ export function DocumentList({ initialDocuments, organizationId }: DocumentListP
                             <TableHead>Status</TableHead>
                             <TableHead>Size</TableHead>
                             <TableHead>Uploaded</TableHead>
-                            {canDeleteDocuments && <TableHead className="w-[50px]"></TableHead>}
+                            {canDelete && <TableHead className="w-[50px]"></TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -219,7 +199,7 @@ export function DocumentList({ initialDocuments, organizationId }: DocumentListP
                                 <TableCell className="text-muted-foreground">
                                     {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
                                 </TableCell>
-                                {canDeleteDocuments && (
+                                {canDelete && (
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
