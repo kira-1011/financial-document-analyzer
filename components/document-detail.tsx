@@ -41,13 +41,13 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5" />;
       case 'failed':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5" />;
       case 'processing':
-        return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-5 w-5 animate-spin" />;
       default:
-        return <Clock className="h-5 w-5 text-yellow-500" />;
+        return <Clock className="h-5 w-5" />;
     }
   };
 
@@ -138,7 +138,7 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold truncate max-w-[400px]">{document.fileName}</h1>
+              <h1 className="text-xl font-bold truncate max-w-[400px]">{document.fileName}</h1>
               <Badge variant={getStatusBadgeVariant(document.status)} className="gap-1">
                 {getStatusIcon(document.status)}
                 {DOCUMENT_STATUS_LABELS[document.status as keyof typeof DOCUMENT_STATUS_LABELS] ||

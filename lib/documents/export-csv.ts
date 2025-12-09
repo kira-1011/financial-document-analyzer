@@ -1,4 +1,8 @@
 import type { BankStatementData, InvoiceData, ReceiptData } from './schemas';
+import JSZip from 'jszip';
+import type { Database } from '@/types/supabase';
+
+type Document = Database['public']['Tables']['documents']['Row'];
 
 // Helper to escape CSV values (handle commas, quotes, newlines)
 function escapeCSV(value: string | number | undefined | null): string {
@@ -183,8 +187,16 @@ export function receiptToCSV(data: ReceiptData): string {
   return lines.join('\n');
 }
 
-// Main export function that handles all document types
-export function exportToCSV(documentType: string, extractedData: unknown, fileName: string): void {
+// Generate CSV content for a single document (without triggering download)
+export function generateDocumentCSV(
+  documentType: string | null,
+  extractedData: unknown,
+  fileName: string
+): { content: string; name: string } | null {
+  if (!documentType || !extractedData) {
+    return null;
+  }
+
   let csvContent: string;
 
   switch (documentType) {
@@ -201,20 +213,64 @@ export function exportToCSV(documentType: string, extractedData: unknown, fileNa
       csvContent = `Data\n"${JSON.stringify(extractedData).replace(/"/g, '""')}"`;
   }
 
+  // Generate filename
+  const baseName = fileName.replace(/\.[^/.]+$/, '');
+  const csvFileName = `${documentType}_${baseName}.csv`;
+
+  return { content: csvContent, name: csvFileName };
+}
+
+// Export single document as CSV (triggers download)
+export function exportToCSV(documentType: string, extractedData: unknown, fileName: string): void {
+  const result = generateDocumentCSV(documentType, extractedData, fileName);
+  if (!result) return;
+
   // Add UTF-8 BOM for Excel compatibility
   const BOM = '\uFEFF';
-  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob([BOM + result.content], { type: 'text/csv;charset=utf-8' });
 
-  // Generate filename
-  const date = new Date().toISOString().split('T')[0];
-  const baseName = fileName.replace(/\.[^/.]+$/, '');
-  const downloadName = `${documentType}_${baseName}_${date}.csv`;
-
-  // Create download link and trigger
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = downloadName;
+  link.download = result.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// Bulk export multiple documents as a ZIP file
+export async function exportBulkToZip(documents: Document[]): Promise<void> {
+  const zip = new JSZip();
+  let exportedCount = 0;
+
+  for (const doc of documents) {
+    if (doc.status !== 'completed' || !doc.extractedData) {
+      continue; // Skip documents without extracted data
+    }
+
+    const result = generateDocumentCSV(doc.documentType, doc.extractedData, doc.fileName);
+    if (result) {
+      // Add UTF-8 BOM for Excel compatibility
+      const BOM = '\uFEFF';
+      zip.file(result.name, BOM + result.content);
+      exportedCount++;
+    }
+  }
+
+  if (exportedCount === 0) {
+    throw new Error('No completed documents with extracted data to export');
+  }
+
+  // Generate and download ZIP
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const date = new Date().toISOString().split('T')[0];
+  const zipFileName = `documents-export-${date}.zip`;
+
+  const url = URL.createObjectURL(zipBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = zipFileName;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

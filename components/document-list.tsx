@@ -30,7 +30,7 @@ import {
 import { usePolling } from '@/hooks/use-polling';
 import { fetchDocumentStatuses, type DocumentStatus } from '@/lib/documents/api-client';
 import { deleteDocumentAction } from '@/lib/documents/actions';
-import { exportToCSV, downloadCSV } from '@/lib/documents/export';
+import { exportBulkToZip } from '@/lib/documents/export-csv';
 import {
   DOCUMENT_TYPE_LABELS,
   DOCUMENT_STATUS_LABELS,
@@ -303,16 +303,21 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
     state: { sorting, columnFilters, rowSelection },
   });
 
-  // Export handler
-  const handleExport = (includeExtractedData: boolean) => {
+  // Export handler - exports detailed data as ZIP
+  const handleExport = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     const docsToExport =
       selectedRows.length > 0 ? selectedRows.map((row) => row.original) : documents;
 
-    const csv = exportToCSV(docsToExport, { includeExtractedData });
-    const filename = `documents-export-${new Date().toISOString().split('T')[0]}.csv`;
-    downloadCSV(csv, filename);
-    toast.success(`Exported ${docsToExport.length} document(s)`);
+    try {
+      await exportBulkToZip(docsToExport);
+      const completedCount = docsToExport.filter(
+        (d) => d.status === 'completed' && d.extractedData
+      ).length;
+      toast.success(`Exported ${completedCount} document(s) as ZIP`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export failed');
+    }
   };
 
   // Delete handler
@@ -402,24 +407,10 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
           </Select>
 
           {/* Export Button - pushed to right */}
-          <div className="ml-auto">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export {selectedCount > 0 && `(${selectedCount})`}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExport(false)}>
-                  Export CSV (Basic)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport(true)}>
-                  Export CSV (With Extracted Data)
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button variant="outline" onClick={handleExport} className="ml-auto">
+            <Download className="h-4 w-4 mr-2" />
+            Export {selectedCount > 0 && `(${selectedCount})`}
+          </Button>
         </div>
       </div>
 
