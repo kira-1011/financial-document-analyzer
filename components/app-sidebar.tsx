@@ -63,7 +63,7 @@ export function AppSidebar({ user, organizations, activeOrganization, ...props }
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pl-4">
           <Brand size="sm" />
           <ModeToggle />
         </div>
