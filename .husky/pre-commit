@@ -1,2 +1,2 @@
-pnpm format
-pnpm lint
+pnpm run format
+pnpm run lint-staged --concurrent false
