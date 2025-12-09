@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { bankStatementToCSV, invoiceToCSV, receiptToCSV } from '@/lib/documents/export-csv';
+import { bankStatementToCSV, invoiceToCSV, receiptToCSV, generateDocumentCSV } from '@/lib/documents/export-csv';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
 
 describe('CSV Export Functions', () => {
@@ -189,5 +189,139 @@ describe('CSV Export Functions', () => {
       const csv = receiptToCSV(receipt);
       expect(csv).toContain('"Joe\'s ""Best"" Coffee"');
     });
+
+    it('escapes values with newlines', () => {
+      const invoice: InvoiceData = {
+        invoice_number: 'INV-001',
+        vendor_name: 'Acme Corp',
+        invoice_date: '2024-01-15',
+        line_items: [],
+        subtotal: 0,
+        total: 0,
+        currency: 'USD',
+        notes: 'Line 1\nLine 2',
+      };
+
+      const csv = invoiceToCSV(invoice);
+      expect(csv).toContain('"Line 1\nLine 2"');
+    });
+
+    it('handles empty string values', () => {
+      const receipt: ReceiptData = {
+        merchant_name: '',
+        receipt_date: '2024-01-15',
+        items: [],
+        subtotal: 0,
+        total: 0,
+        currency: 'USD',
+      };
+
+      const csv = receiptToCSV(receipt);
+      expect(csv).toContain('Merchant,');
+    });
+
+    it('handles undefined optional fields gracefully', () => {
+      const bankStatement: BankStatementData = {
+        bank_name: 'Test Bank',
+        account_number: '1234',
+        statement_period: { start_date: '2024-01-01', end_date: '2024-01-31' },
+        opening_balance: 100,
+        closing_balance: 200,
+        currency: 'USD',
+        transactions: [
+          { date: '2024-01-01', description: 'Test', amount: 50, type: 'credit' },
+        ],
+      };
+
+      const csv = bankStatementToCSV(bankStatement);
+      // Should not include account_holder line since it's undefined
+      expect(csv).not.toContain('Account Holder');
+      // Transaction without balance should have empty balance cell
+      expect(csv).toContain('2024-01-01,Test,credit,50.00,');
+    });
+  });
+});
+
+describe('generateDocumentCSV', () => {
+  it('returns null for null documentType', () => {
+    const result = generateDocumentCSV(null, { data: 'test' }, 'file.pdf');
+    expect(result).toBeNull();
+  });
+
+  it('returns null for null extractedData', () => {
+    const result = generateDocumentCSV('invoice', null, 'file.pdf');
+    expect(result).toBeNull();
+  });
+
+  it('generates correct filename for bank_statement', () => {
+    const data = {
+      bank_name: 'Test',
+      account_number: '1234',
+      statement_period: { start_date: '2024-01-01', end_date: '2024-01-31' },
+      opening_balance: 100,
+      closing_balance: 200,
+      currency: 'USD',
+      transactions: [],
+    };
+
+    const result = generateDocumentCSV('bank_statement', data, 'statement.pdf');
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe('bank_statement_statement.csv');
+  });
+
+  it('generates correct filename for invoice', () => {
+    const data = {
+      invoice_number: 'INV-001',
+      vendor_name: 'Test',
+      invoice_date: '2024-01-01',
+      line_items: [],
+      subtotal: 0,
+      total: 0,
+      currency: 'USD',
+    };
+
+    const result = generateDocumentCSV('invoice', data, 'invoice.pdf');
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe('invoice_invoice.csv');
+  });
+
+  it('generates correct filename for receipt', () => {
+    const data = {
+      merchant_name: 'Shop',
+      receipt_date: '2024-01-01',
+      items: [],
+      subtotal: 0,
+      total: 0,
+      currency: 'USD',
+    };
+
+    const result = generateDocumentCSV('receipt', data, 'receipt.png');
+    expect(result).not.toBeNull();
+    expect(result?.name).toBe('receipt_receipt.csv');
+  });
+
+  it('handles unknown document type with JSON fallback', () => {
+    const data = { custom: 'data' };
+    const result = generateDocumentCSV('other', data, 'file.pdf');
+
+    expect(result).not.toBeNull();
+    expect(result?.content).toContain('Data');
+    expect(result?.content).toContain('custom');
+  });
+
+  it('strips file extension from filename', () => {
+    const data = {
+      invoice_number: 'INV-001',
+      vendor_name: 'Test',
+      invoice_date: '2024-01-01',
+      line_items: [],
+      subtotal: 0,
+      total: 0,
+      currency: 'USD',
+    };
+
+    const result = generateDocumentCSV('invoice', data, 'my-invoice.pdf');
+    expect(result?.name).toBe('invoice_my-invoice.csv');
+    expect(result?.name).not.toContain('.pdf');
   });
 });
