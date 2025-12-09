@@ -30,10 +30,10 @@
 - 📄 **Multi-Document Support** — Bank statements, invoices, and receipts
 - 🤖 **AI-Powered Extraction** — Uses Google Gemini to extract structured data
 - 🏢 **Multi-Tenant** — Organizations with role-based access (owner, admin, member)
-- 👥 **Team Collaboration** — Invite team members via email
+- 👥 **Members** — Invite organization members via email
 - 📊 **Structured Output** — Clean JSON with transactions, line items, totals, and more
 - 🔄 **Background Processing** — Reliable document processing with Trigger.dev
-- 🎨 **Modern UI** — Beautiful, responsive interface with dark/light mode
+- 🎨 **Modern UI** — Shadcn for responsive interface with dark/light mode
 
 ## Supported Documents
 
@@ -280,9 +280,3 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  Made with ❤️ by the open source community
-</p>
