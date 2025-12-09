@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { bankStatementToCSV, invoiceToCSV, receiptToCSV, generateDocumentCSV } from '@/lib/documents/export-csv';
+import {
+  bankStatementToCSV,
+  invoiceToCSV,
+  receiptToCSV,
+  generateDocumentCSV,
+} from '@/lib/documents/export-csv';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
 
 describe('CSV Export Functions', () => {
@@ -228,9 +233,7 @@ describe('CSV Export Functions', () => {
         opening_balance: 100,
         closing_balance: 200,
         currency: 'USD',
-        transactions: [
-          { date: '2024-01-01', description: 'Test', amount: 50, type: 'credit' },
-        ],
+        transactions: [{ date: '2024-01-01', description: 'Test', amount: 50, type: 'credit' }],
       };
 
       const csv = bankStatementToCSV(bankStatement);
