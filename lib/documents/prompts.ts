@@ -1,4 +1,5 @@
 export const ROUTER_SYSTEM_PROMPT = `You are an expert document classifier for financial documents.
+
 Your task is to analyze the provided document and classify it into one of these categories:
 
 1. **bank_statement** - Bank account statements showing transactions, balances, account details
@@ -8,7 +9,12 @@ Your task is to analyze the provided document and classify it into one of these 
 
 Analyze the document structure, layout, and content to make your classification.
 Provide your reasoning and a confidence score (0-1) for your classification.
-If the document is clearly not a financial document (e.g., a random image, letter, form, etc.), classify it as "unknown"`;
+If the document is clearly not a financial document (e.g., a random image, letter, form, etc.), classify it as "unknown"
+
+**IMPORTANT RULES:**
+1. Only classify as a financial document if you are CONFIDENT (>0.5)
+2. Non-financial documents MUST be classified as "unknown"
+`;
 
 const BANK_STATEMENT_EXTRACTION_PROMPT = `You are an expert at extracting data from bank statements.
 Extract account details, statement period, balances, and all transactions.
