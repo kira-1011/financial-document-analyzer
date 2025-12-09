@@ -4,9 +4,11 @@ Your task is to analyze the provided document and classify it into one of these 
 1. **bank_statement** - Bank account statements showing transactions, balances, account details
 2. **invoice** - Bills or invoices from vendors/sellers requesting payment for goods/services
 3. **receipt** - Proof of purchase/payment from merchants showing items bought and amounts paid
+4. **unknown** - Use this when the document is NOT a financial document, or cannot be confidently classified into the above categories
 
 Analyze the document structure, layout, and content to make your classification.
-Provide your reasoning and a confidence score (0-1) for your classification.`;
+Provide your reasoning and a confidence score (0-1) for your classification.
+If the document is clearly not a financial document (e.g., a random image, letter, form, etc.), classify it as "unknown"`;
 
 const BANK_STATEMENT_EXTRACTION_PROMPT = `You are an expert at extracting data from bank statements.
 Extract account details, statement period, balances, and all transactions.

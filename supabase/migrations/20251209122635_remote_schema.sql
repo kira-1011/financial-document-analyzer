@@ -17,7 +17,8 @@ CREATE TYPE "public"."document_status" AS ENUM (
 CREATE TYPE "public"."document_type" AS ENUM (
     'bank_statement',
     'invoice',
-    'receipt'
+    'receipt',
+    'unknown'
 );
 
 -- Documents table

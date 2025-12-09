@@ -1,5 +1,5 @@
 // Document types supported by the application
-export const DOCUMENT_TYPES = ["bank_statement", "invoice", "receipt"] as const;
+export const DOCUMENT_TYPES = ["bank_statement", "invoice", "receipt", "unknown"] as const;
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 // Document processing status
@@ -22,6 +22,7 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
     bank_statement: "Bank Statement",
     invoice: "Invoice",
     receipt: "Receipt",
+    unknown: "Unknown Document",
 };
 
 // Human-readable status labels

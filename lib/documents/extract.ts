@@ -11,7 +11,7 @@ const DEFAULT_AI_MODEL = "gemini-2.5-flash-lite";
 // ============================================
 const routerSchema = z.object({
     reasoning: z.string().describe("Brief explanation of why this document type was chosen"),
-    documentType: z.enum(["bank_statement", "invoice", "receipt"]).describe("The classified document type"),
+    documentType: z.enum(["bank_statement", "invoice", "receipt", "unknown"]).describe("The classified document type. Use 'unknown' if the document is not a financial document or cannot be classified"),
     confidence: z.number().min(0).max(1).describe("Confidence score from 0 to 1"),
 });
 
@@ -68,7 +68,16 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
             ],
         });
 
-        // Step 2: Route to appropriate extractor based on classification
+        // Step 2: Skip extraction for unknown documents
+        if (classification.documentType === "unknown") {
+            return {
+                classification,
+                extractedData: null,
+                aiModel,
+            };
+        }
+
+        // Step 3: Route to appropriate extractor based on classification
         const { object: extractedData } = await generateObject({
             model,
             schema: EXTRACTION_SCHEMAS[classification.documentType],

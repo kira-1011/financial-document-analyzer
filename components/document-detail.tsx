@@ -11,6 +11,7 @@ import {
     Loader2,
     ExternalLink,
     Download,
+    FileQuestion,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -92,14 +93,27 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
         }
 
         const data = document.extractedData as Record<string, unknown>;
+        const docType = document.documentType as string | null;
 
-        switch (document.documentType) {
+        switch (docType) {
             case "bank_statement":
                 return <BankStatementView data={data as BankStatementData} />;
             case "invoice":
                 return <InvoiceView data={data as InvoiceData} />;
             case "receipt":
                 return <ReceiptView data={data as ReceiptData} />;
+            case "unknown":
+                return (
+                    <div className="text-center py-12">
+                        <FileQuestion className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">Unknown Document Type</h3>
+                        <p className="text-muted-foreground">
+                            This document could not be classified as a supported financial document type.
+                            <br />
+                            Supported types: Bank Statements, Invoices, and Receipts.
+                        </p>
+                    </div>
+                );
             default:
                 return (
                     <pre className="text-sm bg-muted p-4 rounded-lg overflow-auto max-h-[600px]">
@@ -258,10 +272,7 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
                             <dt className="text-sm font-medium text-muted-foreground">MIME Type</dt>
                             <dd className="text-sm mt-1">{document.mimeType || "-"}</dd>
                         </div>
-                        <div>
-                            <dt className="text-sm font-medium text-muted-foreground">AI Model</dt>
-                            <dd className="text-sm mt-1">{document.aiModel || "-"}</dd>
-                        </div>
+    
                         <div>
                             <dt className="text-sm font-medium text-muted-foreground">Processed At</dt>
                             <dd className="text-sm mt-1">
