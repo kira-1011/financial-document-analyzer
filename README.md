@@ -45,15 +45,18 @@
 
 ## Tech Stack
 
-- **Framework**: [Next.js 16](https://nextjs.org/) with App Router
-- **AI**: [Google Gemini 2.5 Flash](https://ai.google.dev/) via [Vercel AI SDK v5](https://sdk.vercel.ai/)
-- **Authentication**: [Better Auth](https://better-auth.com/) with Organizations plugin
-- **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
-- **File Storage**: Supabase Storage
-- **Background Jobs**: [Trigger.dev](https://trigger.dev/)
-- **Email**: [Resend](https://resend.com/) with React Email
-- **UI**: [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/)
-- **Validation**: [Zod](https://zod.dev/)
+| Technology | Description | Docs |
+|------------|-------------|------|
+| [Next.js 16](https://nextjs.org/) | React framework with App Router | [Documentation](https://nextjs.org/docs) |
+| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript | [Documentation](https://www.typescriptlang.org/docs/) |
+| [Tailwind CSS](https://tailwindcss.com/) | Utility-first CSS framework | [Documentation](https://tailwindcss.com/docs) |
+| [shadcn/ui](https://ui.shadcn.com/) | Beautifully designed components | [Documentation](https://ui.shadcn.com/docs) |
+| [AI SDK](https://ai-sdk.dev/) | Vercel AI SDK for structured AI outputs | [Documentation](https://ai-sdk.dev/docs) |
+| [Better Auth](https://www.better-auth.com/) | Authentication with Organizations plugin | [Documentation](https://www.better-auth.com/docs) |
+| [Supabase](https://supabase.com/) | PostgreSQL database & file storage | [Documentation](https://supabase.com/docs) |
+| [Trigger.dev](https://trigger.dev/) | Background job processing | [Documentation](https://trigger.dev/docs) |
+| [Resend](https://resend.com/) | Transactional emails | [Documentation](https://resend.com/docs) |
+| [Zod](https://zod.dev/) | Schema validation | [Documentation](https://zod.dev/) |
 
 ## Getting Started
 
@@ -173,28 +176,44 @@ create type document_status as enum ('pending', 'processing', 'completed', 'fail
 
 ```
 ├── app/
-│   ├── (auth)/              # Auth pages (login, signup)
-│   ├── (dashboard)/         # Protected dashboard pages
-│   │   ├── documents/       # Document list and detail views
-│   │   └── settings/        # User and organization settings
-│   ├── accept-invitation/   # Invitation acceptance flow
-│   └── api/auth/            # Better Auth API routes
+│   ├── (auth)/                    # Auth pages (login, signup)
+│   │   ├── login/
+│   │   └── signup/
+│   ├── (dashboard)/               # Protected dashboard pages
+│   │   ├── documents/             # Document list and detail views
+│   │   │   └── [id]/              # Single document view
+│   │   └── settings/              # User and organization settings
+│   │       ├── profile/
+│   │       └── organization/
+│   ├── accept-invitation/         # Team invitation acceptance
+│   └── api/auth/                  # Better Auth API routes
 ├── components/
-│   ├── email/               # React Email templates
-│   ├── extracted-data/      # Document type-specific views
-│   └── ui/                  # shadcn/ui components
+│   ├── email/                     # React Email templates
+│   ├── extracted-data/            # Document type-specific views
+│   │   ├── bank-statement-view.tsx
+│   │   ├── invoice-view.tsx
+│   │   └── receipt-view.tsx
+│   └── ui/                        # shadcn/ui components
+├── hooks/
+│   ├── use-mobile.ts              # Mobile detection hook
+│   └── use-polling.ts             # Polling hook for status updates
 ├── lib/
-│   ├── documents/           # Document processing logic
-│   │   ├── extract.ts       # AI extraction with Gemini
-│   │   ├── schemas.ts       # Zod schemas for each doc type
-│   │   └── upload.ts        # File upload handling
-│   ├── email/               # Email sending utilities
-│   └── supabase/            # Supabase client setup
+│   ├── documents/                 # Document processing logic
+│   │   ├── extract.ts             # AI router + extraction workflow
+│   │   ├── schemas.ts             # Zod schemas for each doc type
+│   │   ├── prompts.ts             # System prompts for AI
+│   │   ├── upload.ts              # File upload handling
+│   │   ├── export-csv.ts          # CSV export functionality
+│   │   └── api.ts                 # Document API functions
+│   ├── email/                     # Email sending utilities
+│   ├── supabase/                  # Supabase client setup
+│   ├── auth.ts                    # Better Auth configuration
+│   └── permissions.ts             # Role-based access control
 ├── trigger/
-│   └── process-document.ts  # Background job for AI processing
+│   └── process-document.ts        # Background job for AI processing
 └── types/
-    ├── index.ts             # Custom TypeScript types
-    └── supabase.ts          # Generated Supabase types
+    ├── index.ts                   # Custom TypeScript types
+    └── supabase.ts                # Generated Supabase types
 ```
 
 ## How It Works
@@ -206,6 +225,36 @@ create type document_status as enum ('pending', 'processing', 'completed', 'fail
 5. **Extract** — AI extracts structured data using type-specific Zod schemas
 6. **Save** — Extracted data is saved to the database
 7. **Display** — User sees the structured data in a formatted view
+
+### AI Router Workflow
+
+The document extraction uses a **routing workflow pattern** from the [AI SDK](https://ai-sdk.dev/docs/agents/workflows#routing):
+
+```
+┌─────────────┐     ┌─────────────────┐     ┌──────────────────────┐
+│   Upload    │────▶│  Router Agent   │────▶│  Specialized Agent   │
+│  Document   │     │  (Classifier)   │     │    (Extractor)       │
+└─────────────┘     └─────────────────┘     └──────────────────────┘
+                            │                         │
+                            ▼                         ▼
+                    ┌───────────────┐         ┌─────────────┐
+                    │ Document Type │         │  Extracted  │
+                    │ + Confidence  │         │    Data     │
+                    └───────────────┘         └─────────────┘
+```
+
+**Step 1: Router Classification**
+- The router agent analyzes the document and classifies it as `bank_statement`, `invoice`, or `receipt`
+- Returns a confidence score (0-1) for the classification
+
+**Step 2: Specialized Extraction**
+- Based on the classification, the document is routed to a specialized extractor
+- Each extractor has its own Zod schema and system prompt optimized for that document type
+- Returns fully structured, validated data
+
+This pattern ensures accurate extraction by using document-type-specific schemas rather than a one-size-fits-all approach.
+
+> 📖 Learn more: [AI SDK Routing Workflows](https://ai-sdk.dev/docs/agents/workflows#routing)
 
 ## Deployment
 
