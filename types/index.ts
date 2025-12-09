@@ -91,7 +91,6 @@ export interface OrganizationFormProps {
   organization: Organization & { members: Member[] };
   invitations: Invitation[] | null;
   currentUserId: User['id'];
-  userRole: UserRole;
   canManage: boolean;
   isOwner: boolean;
 }

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { OrganizationForm } from '@/components/organization-form';
+import { UserRole } from '@/lib/auth-types';
 
 export default async function OrganizationSettingsPage() {
   const session = await auth.api.getSession({
@@ -33,7 +34,7 @@ export default async function OrganizationSettingsPage() {
 
   // Get current user's role in this organization
   const currentMember = activeOrg.members.find((m) => m.userId === session.user.id);
-  const userRole = currentMember?.role || 'member';
+  const userRole: UserRole = (currentMember?.role as UserRole) || 'member';
   const canManage = userRole === 'owner' || userRole === 'admin';
   const isOwner = userRole === 'owner';
 
@@ -42,7 +43,6 @@ export default async function OrganizationSettingsPage() {
       organization={activeOrg}
       invitations={invitations || []}
       currentUserId={session.user.id}
-      userRole={userRole}
       canManage={canManage}
       isOwner={isOwner}
     />

@@ -27,7 +27,7 @@ import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/document
 
 import { exportToCSV } from '@/lib/documents/export-csv';
 import Image from 'next/image';
-  
+
 type Document = Database['public']['Tables']['documents']['Row'];
 
 interface DocumentDetailProps {

@@ -43,7 +43,6 @@ export function OrganizationForm({
   organization,
   invitations,
   currentUserId,
-  userRole: _userRole,
   canManage,
   isOwner,
 }: OrganizationFormProps) {
