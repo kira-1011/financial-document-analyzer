@@ -57,7 +57,7 @@ export async function updateProfileAction(
       success: true,
       message: 'Profile updated successfully',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       message: 'Failed to update profile',
     };

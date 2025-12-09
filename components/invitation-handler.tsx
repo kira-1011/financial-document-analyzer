@@ -149,7 +149,7 @@ export function InvitationHandler({ invitationId }: InvitationHandlerProps) {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Organization Invitation</CardTitle>
-        <CardDescription>You've been invited to join an organization</CardDescription>
+        <CardDescription>You&apos;ve been invited to join an organization</CardDescription>
       </CardHeader>
       <CardContent>
         {status === 'pending' && invitation && (
@@ -177,7 +177,7 @@ export function InvitationHandler({ invitationId }: InvitationHandlerProps) {
               Welcome to {invitation.organizationName}!
             </h2>
             <p className="text-center text-muted-foreground">
-              You've successfully joined the organization. Redirecting...
+              You&apos;ve successfully joined the organization. Redirecting...
             </p>
           </div>
         )}
@@ -188,7 +188,7 @@ export function InvitationHandler({ invitationId }: InvitationHandlerProps) {
             </div>
             <h2 className="text-2xl font-bold text-center">Invitation Declined</h2>
             <p className="text-center text-muted-foreground">
-              You've declined the invitation to join {invitation.organizationName}.
+              You&apos;ve declined the invitation to join {invitation.organizationName}.
             </p>
           </div>
         )}

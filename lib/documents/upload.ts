@@ -2,7 +2,6 @@
 
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { supabase } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { tasks } from '@trigger.dev/sdk/v3';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './constants';

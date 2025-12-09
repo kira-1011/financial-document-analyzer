@@ -58,8 +58,6 @@ export function UploadDocumentDialog() {
   useEffect(() => {
     if (state.success) {
       toast.success(state.message);
-      setFile(null);
-      setOpen(false);
       router.refresh();
     } else if (state.message && !state.success) {
       toast.error(state.message);

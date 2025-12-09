@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { FileText, LayoutDashboard, Settings, HelpCircle } from 'lucide-react';
+import { FileText, LayoutDashboard, Settings } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';

@@ -1,5 +1,4 @@
 import { CheckCircle } from 'lucide-react';
-import Image from 'next/image';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Brand } from '@/components/brand';
 

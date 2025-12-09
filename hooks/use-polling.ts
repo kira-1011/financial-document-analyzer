@@ -10,7 +10,6 @@ interface UsePollingOptions<T> {
 
 export function usePolling<T>({ fetcher, interval = 10000, enabled = true }: UsePollingOptions<T>) {
   const [data, setData] = useState<T | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
   const fetcherRef = useRef(fetcher);
 
   // Keep fetcher ref updated without triggering effect
@@ -22,16 +21,16 @@ export function usePolling<T>({ fetcher, interval = 10000, enabled = true }: Use
     try {
       const result = await fetcherRef.current();
       setData(result);
-    } catch (error) {}
+    } catch {
+      // Silently ignore polling errors
+    }
   }, []);
 
   useEffect(() => {
     if (!enabled) {
-      setIsPolling(false);
       return;
     }
 
-    setIsPolling(true);
     const id = setInterval(poll, interval);
 
     return () => {
@@ -39,5 +38,6 @@ export function usePolling<T>({ fetcher, interval = 10000, enabled = true }: Use
     };
   }, [enabled, interval, poll]);
 
-  return { data, isPolling, refetch: poll };
+  // Derive isPolling from enabled prop
+  return { data, isPolling: enabled, refetch: poll };
 }

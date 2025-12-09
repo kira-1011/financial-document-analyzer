@@ -50,7 +50,7 @@ export function OrganizationSwitcher({
       await organization.setActive({ organizationId: orgId });
       router.refresh();
       toast.success('Switched organization');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to switch organization');
     } finally {
       setIsPending(false);

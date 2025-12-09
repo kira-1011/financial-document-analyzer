@@ -52,7 +52,7 @@ export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) 
       setEmail('');
       setRole('member');
       router.refresh(); // Refresh to show new invitation
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to send invitation');
     } finally {
       setLoading(false);

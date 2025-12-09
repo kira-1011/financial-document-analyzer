@@ -4,7 +4,6 @@ import { nextCookies } from 'better-auth/next-js';
 import { Pool } from 'pg';
 import { ac, owner, admin, member } from '@/lib/permissions';
 import { sendInvitationEmail } from '@/lib/email/send-email';
-import { headers } from 'next/headers';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -56,7 +55,7 @@ export const auth = betterAuth({
             .replace(/[^a-z0-9]/g, '-');
 
           // Use the internal adapter to create organization directly
-          const org = await auth.api.createOrganization({
+          await auth.api.createOrganization({
             body: {
               name: `${user.name}'s Org`,
               slug: `${slug}-${Date.now()}`,

@@ -26,7 +26,8 @@ import type { Database } from '@/types/supabase';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
 
 import { exportToCSV } from '@/lib/documents/export-csv';
-
+import Image from 'next/image';
+  
 type Document = Database['public']['Tables']['documents']['Row'];
 
 interface DocumentDetailProps {
@@ -221,7 +222,7 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
             <CardContent>
               {fileUrl ? (
                 document.mimeType?.startsWith('image/') ? (
-                  <img
+                  <Image
                     src={fileUrl}
                     alt={document.fileName}
                     className="max-w-full h-auto rounded-lg border"
