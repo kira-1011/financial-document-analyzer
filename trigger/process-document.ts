@@ -1,6 +1,5 @@
 import { task } from "@trigger.dev/sdk/v3";
 import { extractDocument } from "@/lib/documents/extract";
-import { AI_MODEL } from "@/lib/documents/constants";
 import { fetchDocument, updateDocument, getSignedUrlForFile } from "@/lib/documents/api";
 
 export const processDocument = task({
@@ -24,9 +23,9 @@ export const processDocument = task({
             const signedUrl = await getSignedUrlForFile(document.filePath);
 
 
-            const { classification, extractedData } = await extractDocument(
+            const { classification, extractedData, aiModel } = await extractDocument(
                 signedUrl,
-                document.mimeType || "application/pdf"
+                document.mimeType || ""
             );
 
             // 5. Update with results
@@ -34,7 +33,7 @@ export const processDocument = task({
                 documentType: classification.documentType,
                 extractedData: extractedData,
                 extractionConfidence: classification.confidence,
-                aiModel: AI_MODEL,
+                aiModel,
                 status: "completed",
                 processedAt: new Date().toISOString(),
             });

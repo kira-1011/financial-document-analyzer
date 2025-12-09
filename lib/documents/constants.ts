@@ -31,6 +31,3 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
     completed: "Completed",
     failed: "Failed",
 };
-
-
-export const AI_MODEL = process.env.AI_MODEL || "gemini-2.5-flash-lite";

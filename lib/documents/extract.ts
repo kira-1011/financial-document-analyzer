@@ -3,7 +3,8 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { bankStatementSchema, invoiceSchema, receiptSchema } from "./schemas";
 import { ROUTER_SYSTEM_PROMPT, EXTRACTION_PROMPTS } from "./prompts";
-import { AI_MODEL } from "./constants";
+
+const DEFAULT_AI_MODEL = "gemini-2.5-flash-lite";
 
 // ============================================
 // Router Classification Schema
@@ -47,7 +48,8 @@ function createDocumentPart(fileUrl: string, mimeType: string) {
 // ============================================
 export async function extractDocument(fileUrl: string, mimeType: string) {
     const documentPart = createDocumentPart(fileUrl, mimeType);
-    const model = google(AI_MODEL);
+    const aiModel = process.env.AI_MODEL || DEFAULT_AI_MODEL;
+    const model = google(aiModel);
 
     try {
         // Step 1: Classify the document
@@ -85,6 +87,7 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
         return {
             classification,
             extractedData,
+            aiModel,
         };
     } catch (error) {
         console.error("[extractDocument] Error:", error);
