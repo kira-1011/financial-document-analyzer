@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS "public"."documents" (
     "extractedData" "jsonb",
     "extractionConfidence" real,
     "aiModel" "text",
+    "runId" "text",  -- Trigger.dev run ID
     "errorMessage" "text",
     "createdAt" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updatedAt" timestamp with time zone DEFAULT "now"() NOT NULL,
