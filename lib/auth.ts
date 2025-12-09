@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { Pool } from "pg";
 import { ac, owner, admin, member } from "@/lib/permissions";
 import { sendInvitationEmail } from "@/lib/email/send-email";
+import { headers } from "next/headers";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -17,11 +18,6 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
-      // Optional: Add cleanup before deletion
-      beforeDelete: async (user) => {
-        console.log(`Deleting user: ${user.email}`);
-        // Add any cleanup logic (e.g., delete user's documents, org cleanup)
-      },
     },
   },
   plugins: [
@@ -36,12 +32,12 @@ export const auth = betterAuth({
         const inviteLink = `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
 
         await sendInvitationEmail({
-            email: data.email,
-            inviterName: data.inviter.user.name,
-            inviterEmail: data.inviter.user.email,
-            organizationName: data.organization.name,
-            organizationLogo: data.organization.logo || undefined,
-            inviteLink,
+          email: data.email,
+          inviterName: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
+          organizationName: data.organization.name,
+          organizationLogo: data.organization.logo || undefined,
+          inviteLink,
         });
       },
     }),
@@ -103,3 +99,4 @@ export const auth = betterAuth({
     },
   },
 });
+

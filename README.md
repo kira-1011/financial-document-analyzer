@@ -94,32 +94,40 @@ Edit `.env.local` with your credentials (see [Environment Variables](#environmen
 
 4. **Set up Supabase**
 
-Create a new Supabase project and run the database migrations:
+Create a new [Supabase](https://supabase.com) project, then:
 
 ```bash
+# Link your project
 pnpm dlx supabase link
+
+# Run Better Auth migrations (creates auth tables)
+pnpm dlx @better-auth/cli@latest migrate
+
+# Run Supabase migrations (creates documents table)
 pnpm dlx supabase db push
 ```
 
-Create a storage bucket named `documents` with the following settings:
+5. **Create storage bucket**
+
+Go to Supabase Dashboard → Storage → Create bucket named `documents`:
 - Public: No
 - Allowed MIME types: `application/pdf`, `image/jpeg`, `image/png`
 - Max file size: 10MB
 
-5. **Generate TypeScript types**
+7. **Generate TypeScript types**
 
 ```bash
 pnpm run update-supabase-types
 ```
 
-6. **Set up Trigger.dev**
+8. **Set up Trigger.dev**
 
 ```bash
 pnpm dlx trigger.dev@latest init
 pnpm dlx trigger.dev@latest dev
 ```
 
-7. **Run the development server**
+9. **Run the development server**
 
 ```bash
 pnpm dev
@@ -133,6 +141,7 @@ Create a `.env.local` file with the following variables:
 
 | Variable | Description |
 |----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (from Supabase) |
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
@@ -151,26 +160,32 @@ Create a `.env.local` file with the following variables:
 ### Documents Table
 
 ```sql
-create table documents (
-  id uuid primary key default gen_random_uuid(),
-  organization_id text not null,
-  user_id text not null,
-  file_name text not null,
-  file_path text not null,
-  file_size integer not null,
-  mime_type text not null,
-  document_type document_type,
-  status document_status default 'pending',
-  extracted_data jsonb,
-  error_message text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
 -- Enums
-create type document_type as enum ('bank_statement', 'invoice', 'receipt');
-create type document_status as enum ('pending', 'processing', 'completed', 'failed');
+CREATE TYPE document_type AS ENUM ('bank_statement', 'invoice', 'receipt');
+CREATE TYPE document_status AS ENUM ('pending', 'processing', 'completed', 'failed');
+
+-- Documents table
+CREATE TABLE documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "organizationId" TEXT NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
+  "uploadedBy" TEXT NOT NULL REFERENCES "user"(id) ON DELETE SET NULL,
+  "fileName" TEXT NOT NULL,
+  "filePath" TEXT NOT NULL,
+  "fileSize" INTEGER,
+  "mimeType" TEXT,
+  "documentType" document_type,
+  status document_status DEFAULT 'pending' NOT NULL,
+  "extractedData" JSONB,
+  "extractionConfidence" REAL,
+  "aiModel" TEXT,
+  "errorMessage" TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT now() NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT now() NOT NULL,
+  "processedAt" TIMESTAMPTZ
+);
 ```
+
+> **Note:** Better Auth tables (`user`, `organization`, `member`, `session`, etc.) are created automatically by running `pnpm dlx @better-auth/cli@latest migrate`.
 
 ## Project Structure
 
