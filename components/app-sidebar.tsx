@@ -1,34 +1,24 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {
-  FileText,
-  LayoutDashboard,
-  Settings,
-  HelpCircle,
-} from "lucide-react"
+import * as React from 'react';
+import { FileText, LayoutDashboard, Settings, HelpCircle } from 'lucide-react';
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-} from "@/components/ui/sidebar"
-import { OrganizationSwitcher } from "@/components/organization-switcher"
-import { Brand } from "@/components/brand"
-import { ModeToggle } from "./mode-toggle"
+import { NavMain } from '@/components/nav-main';
+import { NavSecondary } from '@/components/nav-secondary';
+import { NavUser } from '@/components/nav-user';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
+import { OrganizationSwitcher } from '@/components/organization-switcher';
+import { Brand } from '@/components/brand';
+import { ModeToggle } from './mode-toggle';
 
 const data = {
   navMain: [
-    { title: "Dashboard", url: "/", icon: LayoutDashboard, isActive: true },
-    { title: "Documents", url: "/documents", icon: FileText },
-    { title: "Settings", url: "/settings", icon: Settings },
+    { title: 'Dashboard', url: '/', icon: LayoutDashboard, isActive: true },
+    { title: 'Documents', url: '/documents', icon: FileText },
+    { title: 'Settings', url: '/settings', icon: Settings },
   ],
-  navSecondary: []
-}
+  navSecondary: [],
+};
 
 interface Organization {
   id: string;
@@ -41,12 +31,12 @@ interface Organization {
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
-    name: string
-    email: string
-    image?: string | null
-  }
-  organizations: Organization[]
-  activeOrganization: Organization | null
+    name: string;
+    email: string;
+    image?: string | null;
+  };
+  organizations: Organization[];
+  activeOrganization: Organization | null;
 }
 
 export function AppSidebar({ user, organizations, activeOrganization, ...props }: AppSidebarProps) {
@@ -68,13 +58,14 @@ export function AppSidebar({ user, organizations, activeOrganization, ...props }
           <ModeToggle />
         </div>
 
-        <NavUser user={{
-          name: user.name,
-          email: user.email,
-          avatar: user.image || "",
-        }} />
-
+        <NavUser
+          user={{
+            name: user.name,
+            email: user.email,
+            avatar: user.image || '',
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

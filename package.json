@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest",
     "test:run": "vitest run",
     "update-supabase-types": "pnpm dlx supabase gen types typescript --linked > types/supabase.ts"

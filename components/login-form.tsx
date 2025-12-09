@@ -1,33 +1,23 @@
-"use client";
+'use client';
 
-import { useActionState, useEffect } from "react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { loginAction } from "@/app/(auth)/actions";
-import type { LoginState } from "@/types";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useActionState, useEffect } from 'react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { loginAction } from '@/app/(auth)/actions';
+import type { LoginState } from '@/types';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSearchParams } from 'next/navigation';
 
 const initialState: LoginState = {};
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<'form'>) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
-const searchParams = useSearchParams();
-const callbackUrl = searchParams.get("callbackUrl") || "";
-
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '';
 
   useEffect(() => {
     if (state.message) {
@@ -36,7 +26,7 @@ const callbackUrl = searchParams.get("callbackUrl") || "";
   }, [state]);
 
   return (
-    <form action={formAction} className={cn("flex flex-col gap-6", className)} {...props}>
+    <form action={formAction} className={cn('flex flex-col gap-6', className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -54,11 +44,9 @@ const callbackUrl = searchParams.get("callbackUrl") || "";
             type="email"
             placeholder="you@example.com"
             required
-            aria-describedby={state.errors?.email ? "email-error" : undefined}
+            aria-describedby={state.errors?.email ? 'email-error' : undefined}
           />
-          {state.errors?.email && (
-            <FieldError id="email-error">{state.errors.email[0]}</FieldError>
-          )}
+          {state.errors?.email && <FieldError id="email-error">{state.errors.email[0]}</FieldError>}
         </Field>
         <Field>
           <div className="flex items-center">
@@ -75,7 +63,7 @@ const callbackUrl = searchParams.get("callbackUrl") || "";
             name="password"
             type="password"
             required
-            aria-describedby={state.errors?.password ? "password-error" : undefined}
+            aria-describedby={state.errors?.password ? 'password-error' : undefined}
           />
           {state.errors?.password && (
             <FieldError id="password-error">{state.errors.password[0]}</FieldError>
@@ -89,11 +77,11 @@ const callbackUrl = searchParams.get("callbackUrl") || "";
                 Signing in...
               </>
             ) : (
-              "Sign in"
+              'Sign in'
             )}
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
               Sign up
             </Link>

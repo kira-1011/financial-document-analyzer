@@ -1,17 +1,9 @@
-"use client"
+'use client';
 
-import { useRouter } from "next/navigation"
-import {
-  ChevronsUpDown,
-  LogOut,
-  User,
-} from "lucide-react"
+import { useRouter } from 'next/navigation';
+import { ChevronsUpDown, LogOut, User } from 'lucide-react';
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,40 +12,40 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { authClient } from "@/lib/auth-client"
+} from '@/components/ui/sidebar';
+import { authClient } from '@/lib/auth-client';
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const router = useRouter()
+  const { isMobile } = useSidebar();
+  const router = useRouter();
 
   const getInitials = (name: string) => {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
-      .slice(0, 2)
-  }
+      .slice(0, 2);
+  };
 
   const handleSignOut = async () => {
-    await authClient.signOut()
-    router.push("/login")
-  }
+    await authClient.signOut();
+    router.push('/login');
+  };
 
   return (
     <SidebarMenu>
@@ -79,7 +71,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -99,7 +91,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/settings/profile")}>
+              <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
                 <User />
                 Profile
               </DropdownMenuItem>
@@ -113,5 +105,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

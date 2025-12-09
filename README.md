@@ -37,32 +37,32 @@
 
 ## Supported Documents
 
-| Document Type | Extracted Fields |
-|--------------|------------------|
+| Document Type      | Extracted Fields                                                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Bank Statement** | Bank name, account number, statement period, opening/closing balance, all transactions with dates, descriptions, and amounts |
-| **Invoice** | Vendor info, invoice number, dates, line items with quantities and prices, subtotal, tax, total |
-| **Receipt** | Merchant name, date, items purchased, payment method, subtotal, tax, total |
+| **Invoice**        | Vendor info, invoice number, dates, line items with quantities and prices, subtotal, tax, total                              |
+| **Receipt**        | Merchant name, date, items purchased, payment method, subtotal, tax, total                                                   |
 
 ## Tech Stack
 
-| Technology | Description | Docs |
-|------------|-------------|------|
-| [Next.js 16](https://nextjs.org/) | React framework with App Router | [Documentation](https://nextjs.org/docs) |
-| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript | [Documentation](https://www.typescriptlang.org/docs/) |
-| [Tailwind CSS](https://tailwindcss.com/) | Utility-first CSS framework | [Documentation](https://tailwindcss.com/docs) |
-| [shadcn/ui](https://ui.shadcn.com/) | Beautifully designed components | [Documentation](https://ui.shadcn.com/docs) |
-| [AI SDK](https://ai-sdk.dev/) | Vercel AI SDK for structured AI outputs | [Documentation](https://ai-sdk.dev/docs) |
-| [Better Auth](https://www.better-auth.com/) | Authentication with Organizations plugin | [Documentation](https://www.better-auth.com/docs) |
-| [Supabase](https://supabase.com/) | PostgreSQL database & file storage | [Documentation](https://supabase.com/docs) |
-| [Trigger.dev](https://trigger.dev/) | Background job processing | [Documentation](https://trigger.dev/docs) |
-| [Resend](https://resend.com/) | Transactional emails | [Documentation](https://resend.com/docs) |
-| [Zod](https://zod.dev/) | Schema validation | [Documentation](https://zod.dev/) |
+| Technology                                    | Description                              | Docs                                                  |
+| --------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| [Next.js 16](https://nextjs.org/)             | React framework with App Router          | [Documentation](https://nextjs.org/docs)              |
+| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript                     | [Documentation](https://www.typescriptlang.org/docs/) |
+| [Tailwind CSS](https://tailwindcss.com/)      | Utility-first CSS framework              | [Documentation](https://tailwindcss.com/docs)         |
+| [shadcn/ui](https://ui.shadcn.com/)           | Beautifully designed components          | [Documentation](https://ui.shadcn.com/docs)           |
+| [AI SDK](https://ai-sdk.dev/)                 | Vercel AI SDK for structured AI outputs  | [Documentation](https://ai-sdk.dev/docs)              |
+| [Better Auth](https://www.better-auth.com/)   | Authentication with Organizations plugin | [Documentation](https://www.better-auth.com/docs)     |
+| [Supabase](https://supabase.com/)             | PostgreSQL database & file storage       | [Documentation](https://supabase.com/docs)            |
+| [Trigger.dev](https://trigger.dev/)           | Background job processing                | [Documentation](https://trigger.dev/docs)             |
+| [Resend](https://resend.com/)                 | Transactional emails                     | [Documentation](https://resend.com/docs)              |
+| [Zod](https://zod.dev/)                       | Schema validation                        | [Documentation](https://zod.dev/)                     |
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recommended) or npm
 - Supabase account
 - Google AI API key
@@ -110,6 +110,7 @@ pnpm dlx supabase db push
 5. **Create storage bucket**
 
 Go to Supabase Dashboard → Storage → Create bucket named `documents`:
+
 - Public: No
 - Allowed MIME types: `application/pdf`, `image/jpeg`, `image/png`
 - Max file size: 10MB
@@ -139,21 +140,21 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Create a `.env.local` file with the following variables:
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string (from Supabase) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) |
-| `BETTER_AUTH_SECRET` | Random string for session encryption (min 32 chars) |
-| `BETTER_AUTH_URL` | Your app URL (e.g., `http://localhost:3000`) |
-| `BETTER_AUTH_TRUSTED_ORIGINS` | Trusted origins for auth |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI Studio API key |
-| `AI_MODEL` | AI model to use (default: `gemini-2.5-flash-lite`) |
-| `RESEND_API_KEY` | Resend API key for sending emails |
-| `EMAIL_FROM` | From address for emails |
-| `TRIGGER_SECRET_KEY` | Trigger.dev secret key |
-| `NEXT_PUBLIC_APP_URL` | Public app URL |
+| Variable                        | Description                                         |
+| ------------------------------- | --------------------------------------------------- |
+| `DATABASE_URL`                  | PostgreSQL connection string (from Supabase)        |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Your Supabase project URL                           |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key                              |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service role key (server-side only)        |
+| `BETTER_AUTH_SECRET`            | Random string for session encryption (min 32 chars) |
+| `BETTER_AUTH_URL`               | Your app URL (e.g., `http://localhost:3000`)        |
+| `BETTER_AUTH_TRUSTED_ORIGINS`   | Trusted origins for auth                            |
+| `GOOGLE_GENERATIVE_AI_API_KEY`  | Google AI Studio API key                            |
+| `AI_MODEL`                      | AI model to use (default: `gemini-2.5-flash-lite`)  |
+| `RESEND_API_KEY`                | Resend API key for sending emails                   |
+| `EMAIL_FROM`                    | From address for emails                             |
+| `TRIGGER_SECRET_KEY`            | Trigger.dev secret key                              |
+| `NEXT_PUBLIC_APP_URL`           | Public app URL                                      |
 
 ## Database Schema
 
@@ -259,10 +260,12 @@ The document extraction uses a **routing workflow pattern** from the [AI SDK](ht
 ```
 
 **Step 1: Router Classification**
+
 - The router agent analyzes the document and classifies it as `bank_statement`, `invoice`, or `receipt`
 - Returns a confidence score (0-1) for the classification
 
 **Step 2: Specialized Extraction**
+
 - Based on the classification, the document is routed to a specialized extractor
 - Each extractor has its own Zod schema and system prompt optimized for that document type
 - Returns fully structured, validated data

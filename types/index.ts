@@ -1,5 +1,12 @@
-import type { Sidebar } from "@/components/ui/sidebar";
-import type { Organization , ActiveOrganization, User, Invitation, UserRole, Member} from "@/lib/auth-types";
+import type { Sidebar } from '@/components/ui/sidebar';
+import type {
+  Organization,
+  ActiveOrganization,
+  User,
+  Invitation,
+  UserRole,
+  Member,
+} from '@/lib/auth-types';
 
 // Auth Types
 export type LoginState = {
@@ -83,7 +90,7 @@ export interface ProfileFormProps {
 export interface OrganizationFormProps {
   organization: Organization & { members: Member[] };
   invitations: Invitation[] | null;
-  currentUserId: User["id"];
+  currentUserId: User['id'];
   userRole: UserRole;
   canManage: boolean;
   isOwner: boolean;

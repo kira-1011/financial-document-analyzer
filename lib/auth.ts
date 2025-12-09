@@ -1,10 +1,10 @@
-import { betterAuth } from "better-auth";
-import { organization, } from "better-auth/plugins";
-import { nextCookies } from "better-auth/next-js";
-import { Pool } from "pg";
-import { ac, owner, admin, member } from "@/lib/permissions";
-import { sendInvitationEmail } from "@/lib/email/send-email";
-import { headers } from "next/headers";
+import { betterAuth } from 'better-auth';
+import { organization } from 'better-auth/plugins';
+import { nextCookies } from 'better-auth/next-js';
+import { Pool } from 'pg';
+import { ac, owner, admin, member } from '@/lib/permissions';
+import { sendInvitationEmail } from '@/lib/email/send-email';
+import { headers } from 'next/headers';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -50,7 +50,10 @@ export const auth = betterAuth({
       create: {
         after: async (user) => {
           // Auto-create a default organization for new users
-          const slug = user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+          const slug = user.email
+            .split('@')[0]
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-');
 
           // Use the internal adapter to create organization directly
           const org = await auth.api.createOrganization({
@@ -83,7 +86,7 @@ export const auth = betterAuth({
               },
             };
           } catch (error) {
-            console.error("Failed to get org for session:", error);
+            console.error('Failed to get org for session:', error);
             return { data: session };
           }
         },
@@ -99,4 +102,3 @@ export const auth = betterAuth({
     },
   },
 });
-

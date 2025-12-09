@@ -74,28 +74,34 @@ Documentation improvements are always appreciated:
 ## Development Setup
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 2. **Set up environment variables**:
+
    ```bash
    cp .env.example .env.local
    ```
+
    Fill in your credentials (see README for details).
 
 3. **Set up the database**:
+
    ```bash
    pnpm dlx supabase link
    pnpm dlx supabase db push
    ```
 
 4. **Generate types**:
+
    ```bash
    pnpm run update-supabase-types
    ```
 
 5. **Start the development server**:
+
    ```bash
    pnpm dev
    ```
@@ -108,12 +114,14 @@ Documentation improvements are always appreciated:
 ## Pull Request Process
 
 1. **Update your fork** with the latest upstream changes:
+
    ```bash
    git fetch upstream
    git rebase upstream/main
    ```
 
 2. **Push your changes** to your fork:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -150,6 +158,7 @@ type(scope): description
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -159,6 +168,7 @@ type(scope): description
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```
 feat(documents): add PDF preview in document detail view
 fix(auth): resolve session expiration issue
@@ -186,4 +196,3 @@ docs(readme): add deployment instructions
 Feel free to open an issue with your question or reach out to the maintainers.
 
 Thank you for contributing! 🙏
-

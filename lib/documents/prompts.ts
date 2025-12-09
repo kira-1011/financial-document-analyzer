@@ -32,7 +32,7 @@ Use YYYY-MM-DD format for dates and HH:MM format for times.
 If information is not clearly visible, omit that field.`;
 
 export const EXTRACTION_PROMPTS = {
-    bank_statement: BANK_STATEMENT_EXTRACTION_PROMPT,
-    invoice: INVOICE_EXTRACTION_PROMPT,
-    receipt: RECEIPT_EXTRACTION_PROMPT,
+  bank_statement: BANK_STATEMENT_EXTRACTION_PROMPT,
+  invoice: INVOICE_EXTRACTION_PROMPT,
+  receipt: RECEIPT_EXTRACTION_PROMPT,
 } as const;

@@ -1,32 +1,23 @@
-"use client";
+'use client';
 
-import { useActionState, useEffect } from "react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { signupAction } from "@/app/(auth)/actions";
-import type { SignupState } from "@/types";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useActionState, useEffect } from 'react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { signupAction } from '@/app/(auth)/actions';
+import type { SignupState } from '@/types';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSearchParams } from 'next/navigation';
 
 const initialState: SignupState = {};
 
-export function SignupForm({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
+export function SignupForm({ className, ...props }: React.ComponentProps<'form'>) {
   const [state, formAction, pending] = useActionState(signupAction, initialState);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "";
+  const callbackUrl = searchParams.get('callbackUrl') || '';
 
   useEffect(() => {
     if (state.message) {
@@ -35,7 +26,7 @@ export function SignupForm({
   }, [state]);
 
   return (
-    <form action={formAction} className={cn("flex flex-col gap-6", className)} {...props}>
+    <form action={formAction} className={cn('flex flex-col gap-6', className)} {...props}>
       <FieldGroup>
         <h1 className="text-2xl font-bold text-center">Create an account</h1>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
@@ -47,11 +38,9 @@ export function SignupForm({
             type="text"
             placeholder="John Doe"
             required
-            aria-describedby={state.errors?.name ? "name-error" : undefined}
+            aria-describedby={state.errors?.name ? 'name-error' : undefined}
           />
-          {state.errors?.name && (
-            <FieldError id="name-error">{state.errors.name[0]}</FieldError>
-          )}
+          {state.errors?.name && <FieldError id="name-error">{state.errors.name[0]}</FieldError>}
         </Field>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -61,11 +50,9 @@ export function SignupForm({
             type="email"
             placeholder="you@example.com"
             required
-            aria-describedby={state.errors?.email ? "email-error" : undefined}
+            aria-describedby={state.errors?.email ? 'email-error' : undefined}
           />
-          {state.errors?.email && (
-            <FieldError id="email-error">{state.errors.email[0]}</FieldError>
-          )}
+          {state.errors?.email && <FieldError id="email-error">{state.errors.email[0]}</FieldError>}
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -74,7 +61,7 @@ export function SignupForm({
             name="password"
             type="password"
             required
-            aria-describedby={state.errors?.password ? "password-error" : undefined}
+            aria-describedby={state.errors?.password ? 'password-error' : undefined}
           />
           <FieldDescription>Must be at least 8 characters long.</FieldDescription>
           {state.errors?.password && (
@@ -88,7 +75,7 @@ export function SignupForm({
             name="confirmPassword"
             type="password"
             required
-            aria-describedby={state.errors?.confirmPassword ? "confirm-password-error" : undefined}
+            aria-describedby={state.errors?.confirmPassword ? 'confirm-password-error' : undefined}
           />
           {state.errors?.confirmPassword && (
             <FieldError id="confirm-password-error">{state.errors.confirmPassword[0]}</FieldError>
@@ -102,11 +89,11 @@ export function SignupForm({
                 Creating account...
               </>
             ) : (
-              "Create account"
+              'Create account'
             )}
           </Button>
           <FieldDescription className="text-center">
-            Already have an account?{" "}
+            Already have an account?{' '}
             <Link href="/login" className="underline underline-offset-4 hover:text-primary">
               Sign in
             </Link>
