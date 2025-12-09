@@ -10,6 +10,7 @@ import {
     Clock,
     Loader2,
     ExternalLink,
+    Download,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ import { InvoiceView } from "@/components/extracted-data/invoice-view";
 import { ReceiptView } from "@/components/extracted-data/receipt-view";
 import type { Database } from "@/types/supabase";
 import type { BankStatementData, InvoiceData, ReceiptData } from "@/lib/documents/schemas";
+
+import { exportToCSV } from "@/lib/documents/export-csv";
 
 type Document = Database["public"]["Tables"]["documents"]["Row"];
 
@@ -64,6 +67,11 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
         if (bytes < 1024) return bytes + " B";
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
         return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    };
+
+    const handleExportCSV = () => {
+        if (!document.extractedData || !document.documentType) return;
+        exportToCSV(document.documentType, document.extractedData, document.fileName);
     };
 
     const renderExtractedData = () => {
@@ -136,14 +144,22 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
                     </div>
                 </div>
 
-                {fileUrl && (
-                    <Button variant="outline" size="sm" asChild>
-                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View Original
-                        </a>
-                    </Button>
-                )}
+                <div className="flex gap-2">
+                    {document.status === "completed" && document.extractedData && (
+                        <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Export CSV
+                        </Button>
+                    )}
+                    {fileUrl && (
+                        <Button variant="outline" size="sm" asChild>
+                            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                View Original
+                            </a>
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Error Message */}

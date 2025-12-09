@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar"
 import { OrganizationSwitcher } from "@/components/organization-switcher"
 import { Brand } from "@/components/brand"
+import { ModeToggle } from "./mode-toggle"
 
 const data = {
   navMain: [
@@ -26,7 +27,7 @@ const data = {
     { title: "Documents", url: "/documents", icon: FileText },
     { title: "Settings", url: "/settings", icon: Settings },
   ],
-  navSecondary: [ ]
+  navSecondary: []
 }
 
 interface Organization {
@@ -62,7 +63,11 @@ export function AppSidebar({ user, organizations, activeOrganization, ...props }
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <Brand size="sm" />
+        <div className="flex items-center justify-between">
+          <Brand size="sm" />
+          <ModeToggle />
+        </div>
+
         <NavUser user={{
           name: user.name,
           email: user.email,

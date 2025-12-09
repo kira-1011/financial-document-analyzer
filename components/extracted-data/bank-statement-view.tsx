@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { TrendingUp, TrendingDown, Wallet, Building2, Calendar, CreditCard } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Building2, Calendar, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -110,11 +110,12 @@ export function BankStatementView({ data }: BankStatementViewProps) {
             {/* Account Holder */}
             {data.account_holder && (
                 <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Account Holder</CardTitle>
+                    <CardHeader className="flex flex-row items-center space-y-0 pb-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Account Holder</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="font-medium">{data.account_holder}</p>
+                        <p className="text-lg font-bold">{data.account_holder}</p>
                     </CardContent>
                 </Card>
             )}
