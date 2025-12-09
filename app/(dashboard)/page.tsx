@@ -10,9 +10,10 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Upload, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { UploadDocumentDialog } from '@/components/upload-document-dialog';
+import { DocumentStatsCards } from '@/components/document-stats';
 
 export default async function Home() {
   const session = await auth.api.getSession({
@@ -24,30 +25,13 @@ export default async function Home() {
   });
 
   // Fetch document stats if org is active
-  const docStats = activeOrg
+  const stats = activeOrg
     ? await fetchDocumentStats(activeOrg.id)
-    : { total: 0, completed: 0, processing: 0, pending: 0, failed: 0 };
-
-  const stats = [
-    {
-      title: 'Total Documents',
-      value: docStats.total.toString(),
-      description: 'Documents uploaded',
-      icon: FileText,
-    },
-    {
-      title: 'Processed',
-      value: docStats.completed.toString(),
-      description: 'Successfully extracted',
-      icon: CheckCircle,
-    },
-    {
-      title: 'Processing',
-      value: (docStats.processing + docStats.pending).toString(),
-      description: 'Currently analyzing',
-      icon: Clock,
-    },
-  ];
+    : {
+        total: 0,
+        byStatus: { completed: 0, processing: 0, pending: 0, failed: 0 },
+        byType: { bank_statement: 0, invoice: 0, receipt: 0, unknown: 0 },
+      };
 
   return (
     <>
@@ -76,22 +60,8 @@ export default async function Home() {
           <UploadDocumentDialog />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {stats.map((stat) => (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Stats Dashboard */}
+        <DocumentStatsCards stats={stats} />
 
         <Card>
           <CardHeader>

@@ -4,7 +4,6 @@ import type {
   ActiveOrganization,
   User,
   Invitation,
-  UserRole,
   Member,
 } from '@/lib/auth-types';
 

@@ -45,49 +45,52 @@ export async function fetchDocument(documentId: string): Promise<Document | null
 
 export interface DocumentStats {
   total: number;
-  completed: number;
-  processing: number;
-  pending: number;
-  failed: number;
+  byStatus: {
+    completed: number;
+    processing: number;
+    pending: number;
+    failed: number;
+  };
+  byType: {
+    bank_statement: number;
+    invoice: number;
+    receipt: number;
+    unknown: number;
+  };
 }
 
 export async function fetchDocumentStats(organizationId: string): Promise<DocumentStats> {
-  // Fetch all counts in parallel
-  const [totalResult, completedResult, processingResult, pendingResult, failedResult] =
-    await Promise.all([
-      supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organizationId', organizationId),
-      supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organizationId', organizationId)
-        .eq('status', 'completed'),
-      supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organizationId', organizationId)
-        .eq('status', 'processing'),
-      supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organizationId', organizationId)
-        .eq('status', 'pending'),
-      supabase
-        .from('documents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organizationId', organizationId)
-        .eq('status', 'failed'),
-    ]);
+  // Fetch documents with just the fields we need for counting
+  const { data, error } = await supabase
+    .from('documents')
+    .select('status, documentType')
+    .eq('organizationId', organizationId);
 
-  return {
-    total: totalResult.count || 0,
-    completed: completedResult.count || 0,
-    processing: processingResult.count || 0,
-    pending: pendingResult.count || 0,
-    failed: failedResult.count || 0,
+  if (error) {
+    console.error('[fetchDocumentStats] Error:', error);
+    throw new Error('Failed to fetch document stats');
+  }
+
+  const docs = data || [];
+
+  // Calculate counts
+  const stats: DocumentStats = {
+    total: docs.length,
+    byStatus: {
+      completed: docs.filter((d) => d.status === 'completed').length,
+      processing: docs.filter((d) => d.status === 'processing').length,
+      pending: docs.filter((d) => d.status === 'pending').length,
+      failed: docs.filter((d) => d.status === 'failed').length,
+    },
+    byType: {
+      bank_statement: docs.filter((d) => d.documentType === 'bank_statement').length,
+      invoice: docs.filter((d) => d.documentType === 'invoice').length,
+      receipt: docs.filter((d) => d.documentType === 'receipt').length,
+      unknown: docs.filter((d) => d.documentType === 'unknown' || !d.documentType).length,
+    },
   };
+
+  return stats;
 }
 
 export async function uploadFileToStorage(filePath: string, file: File): Promise<boolean> {
