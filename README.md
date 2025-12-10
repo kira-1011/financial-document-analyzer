@@ -136,6 +136,17 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Linting & Formatting
+
+# Lint code
+pnpm lint
+
+# Format code
+pnpm format
+
+# Check formatting (CI)
+pnpm format:checkPre-commit hooks run automatically via Husky + lint-staged.
+
 ## Environment Variables
 
 Create a `.env.local` file with the following variables:
