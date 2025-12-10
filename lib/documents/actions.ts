@@ -38,7 +38,6 @@ export async function reprocessDocument(
   documentId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-
     // Fetch document to get existing run ID
     const document = await fetchDocument(documentId);
     if (!document) {

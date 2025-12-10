@@ -43,21 +43,18 @@ interface DocumentDetailProps {
 export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
   const [activeTab, setActiveTab] = useState('extracted');
   const router = useRouter();
-  
+
   // useActionState for reprocess action
-  const [reprocessState, reprocessAction, isReprocessing] = useActionState(
-    async () => {
-      const result = await reprocessDocument(document.id);
-      if (result.success) {
-        toast.success('Document queued for reprocessing');
-        router.refresh();
-      } else {
-        toast.error(result.error || 'Failed to reprocess');
-      }
-      return result;
-    },
-    null
-  );
+  const [reprocessState, reprocessAction, isReprocessing] = useActionState(async () => {
+    const result = await reprocessDocument(document.id);
+    if (result.success) {
+      toast.success('Document queued for reprocessing');
+      router.refresh();
+    } else {
+      toast.error(result.error || 'Failed to reprocess');
+    }
+    return result;
+  }, null);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -200,9 +197,9 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
           )}
 
           {/* Reprocess button using useActionState pattern */}
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => startTransition(reprocessAction)}
             disabled={isReprocessing}
           >

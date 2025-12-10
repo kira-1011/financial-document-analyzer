@@ -132,18 +132,15 @@ function RowActions({
   canDelete: boolean;
   onDeleteClick: (doc: Document) => void;
 }) {
-  const [reprocessState, reprocessAction, isReprocessing] = useActionState(
-    async () => {
-      const result = await reprocessDocument(document.id);
-      if (result.success) {
-        toast.success('Document queued for reprocessing');
-      } else {
-        toast.error(result.error || 'Failed to reprocess');
-      }
-      return result;
-    },
-    null
-  );
+  const [reprocessState, reprocessAction, isReprocessing] = useActionState(async () => {
+    const result = await reprocessDocument(document.id);
+    if (result.success) {
+      toast.success('Document queued for reprocessing');
+    } else {
+      toast.error(result.error || 'Failed to reprocess');
+    }
+    return result;
+  }, null);
 
   return (
     <DropdownMenu>
@@ -169,7 +166,7 @@ function RowActions({
           <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
           {isReprocessing ? 'Reprocessing...' : 'Reprocess'}
         </DropdownMenuItem>
-        
+
         {/* Delete option - only if canDelete */}
         {canDelete && (
           <DropdownMenuItem
@@ -221,17 +218,13 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
   const [, deleteAction, isDeleting] = useActionState(async () => {
     if (documentsToDelete.length === 0) return null;
 
-    const results = await Promise.all(
-      documentsToDelete.map((doc) => deleteDocumentAction(doc.id))
-    );
+    const results = await Promise.all(documentsToDelete.map((doc) => deleteDocumentAction(doc.id)));
 
     const successCount = results.filter((r) => r.success).length;
     const failCount = results.length - successCount;
 
     if (successCount > 0) {
-      const deletedIds = documentsToDelete
-        .filter((_, i) => results[i].success)
-        .map((d) => d.id);
+      const deletedIds = documentsToDelete.filter((_, i) => results[i].success).map((d) => d.id);
       setDocuments((prev) => prev.filter((d) => !deletedIds.includes(d.id)));
       setRowSelection({});
       toast.success(`Deleted ${successCount} document(s)`);
@@ -572,11 +565,13 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
             <AlertDialogDescription>
               {documentsToDelete.length === 1 ? (
                 <>
-                  Are you sure you want to delete &quot;{documentsToDelete[0]?.fileName}&quot;? This action cannot be undone.
+                  Are you sure you want to delete &quot;{documentsToDelete[0]?.fileName}&quot;? This
+                  action cannot be undone.
                 </>
               ) : (
                 <>
-                  Are you sure you want to delete {documentsToDelete.length} documents? This action cannot be undone.
+                  Are you sure you want to delete {documentsToDelete.length} documents? This action
+                  cannot be undone.
                 </>
               )}
             </AlertDialogDescription>
