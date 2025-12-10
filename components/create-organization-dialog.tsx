@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -27,6 +28,9 @@ interface CreateOrganizationDialogProps {
 
 export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizationDialogProps) {
   const router = useRouter();
+  
+  // Key counter to reset form state when dialog opens
+  const [formKey, setFormKey] = React.useState(0);
 
   const [state, formAction, isPending] = useActionState<CreateOrgState, FormData>(
     createOrganizationAction,
@@ -38,14 +42,13 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
   const [slug, setSlug] = React.useState('');
   const [slugTouched, setSlugTouched] = React.useState(false);
 
-  const generateSlug = (value: string) => {
-    return value
+  const generateSlug = (value: string) =>
+    value
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
-  };
 
   const handleNameChange = (value: string) => {
     setName(value);
@@ -54,25 +57,18 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
     }
   };
 
-  // Reset form state
-  const resetForm = React.useCallback(() => {
-    setName('');
-    setSlug('');
-    setSlugTouched(false);
-  }, []);
+  // Handle open change - reset form when opening
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setFormKey((k) => k + 1);
+      setName('');
+      setSlug('');
+      setSlugTouched(false);
+    }
+    onOpenChange(newOpen);
+  };
 
-  // Handle dialog open/close with form reset
-  const handleOpenChange = React.useCallback(
-    (newOpen: boolean) => {
-      if (!newOpen) {
-        resetForm();
-      }
-      onOpenChange(newOpen);
-    },
-    [onOpenChange, resetForm]
-  );
-
-  // Handle success/error via ref to avoid cascading renders
+  // Handle success/error
   const prevStateRef = React.useRef(state);
   useEffect(() => {
     if (prevStateRef.current === state) return;
@@ -80,15 +76,12 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
 
     if (state.success) {
       toast.success(state.message || 'Organization created!');
-      // Defer state update to avoid synchronous setState in effect
-      queueMicrotask(() => {
-        handleOpenChange(false);
-      });
+      queueMicrotask(() => onOpenChange(false));
       router.refresh();
     } else if (state.message && !state.success) {
       toast.error(state.message);
     }
-  }, [state, handleOpenChange, router]);
+  }, [state, onOpenChange, router]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -103,7 +96,7 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
           </DialogDescription>
         </DialogHeader>
 
-        <form action={formAction} className="space-y-4">
+        <form key={formKey} action={formAction} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Organization Name</Label>
             <Input
@@ -113,12 +106,9 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
               disabled={isPending}
-              aria-describedby={state.errors?.name ? 'name-error' : undefined}
             />
             {state.errors?.name && (
-              <p id="name-error" className="text-sm text-destructive">
-                {state.errors.name[0]}
-              </p>
+              <p className="text-sm text-destructive">{state.errors.name[0]}</p>
             )}
           </div>
 
@@ -136,25 +126,19 @@ export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizat
                   setSlug(generateSlug(e.target.value));
                 }}
                 disabled={isPending}
-                aria-describedby={state.errors?.slug ? 'slug-error' : undefined}
               />
             </div>
             {state.errors?.slug && (
-              <p id="slug-error" className="text-sm text-destructive">
-                {state.errors.slug[0]}
-              </p>
+              <p className="text-sm text-destructive">{state.errors.slug[0]}</p>
             )}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
+            <DialogClose asChild>
+              <Button type="button" variant="outline" disabled={isPending}>
+                Cancel
+              </Button>
+            </DialogClose>
             <Button type="submit" disabled={isPending}>
               {isPending ? (
                 <>

@@ -394,6 +394,7 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
     [canDelete]
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: documents,
     columns,

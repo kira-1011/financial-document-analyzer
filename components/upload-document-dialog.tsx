@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useActionState, useEffect } from 'react';
+import { useCallback, useState, useActionState, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, File, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,10 +55,19 @@ export function UploadDocumentDialog() {
   };
 
   // Handle state changes
+  const prevStateRef =  useRef(state);
   useEffect(() => {
+    if (prevStateRef.current === state) return;
+    prevStateRef.current = state;
+
     if (state.success) {
       toast.success(state.message);
       router.refresh();
+      // Defer state updates to avoid synchronous setState in effect
+      queueMicrotask(() => {
+        setOpen(false);
+        setFile(null);
+      });
     } else if (state.message && !state.success) {
       toast.error(state.message);
     } else if (state.errors?.file) {
