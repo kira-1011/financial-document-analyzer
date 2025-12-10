@@ -138,6 +138,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Linting & Formatting
 
+```bash
 # Lint code
 pnpm lint
 
@@ -145,7 +146,10 @@ pnpm lint
 pnpm format
 
 # Check formatting (CI)
-pnpm format:checkPre-commit hooks run automatically via Husky + lint-staged.
+pnpm format:check
+```
+
+Pre-commit hooks run automatically via Husky + lint-staged.
 
 ## Environment Variables
 
