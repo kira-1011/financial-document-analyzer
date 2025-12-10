@@ -25,7 +25,7 @@ CREATE TYPE "public"."document_type" AS ENUM (
 CREATE TABLE IF NOT EXISTS "public"."documents" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "organizationId" "text" NOT NULL,
-    "uploadedBy" "text" NOT NULL,
+    "uploadedBy" "text",  -- Remove NOT NULL to allow SET NULL on user deletion
     "fileName" "text" NOT NULL,
     "filePath" "text" NOT NULL,
     "fileSize" integer,
