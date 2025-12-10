@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useActionState, startTransition } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -25,11 +26,12 @@ import {
   Trash2,
   Download,
   ArrowUpDown,
+  RefreshCw,
 } from 'lucide-react';
 
 import { usePolling } from '@/hooks/use-polling';
 import { fetchDocumentStatuses, type DocumentStatus } from '@/lib/documents/api-client';
-import { deleteDocumentAction } from '@/lib/documents/actions';
+import { deleteDocumentAction, reprocessDocument } from '@/lib/documents/actions';
 import { exportBulkToZip } from '@/lib/documents/export-csv';
 import {
   DOCUMENT_TYPE_LABELS,
@@ -120,16 +122,128 @@ const formatFileSize = (bytes: number | null) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
+// Create a separate RowActions component that uses useActionState
+function RowActions({
+  document,
+  canDelete,
+  onDeleteClick,
+}: {
+  document: Document;
+  canDelete: boolean;
+  onDeleteClick: (doc: Document) => void;
+}) {
+  const [reprocessState, reprocessAction, isReprocessing] = useActionState(
+    async () => {
+      const result = await reprocessDocument(document.id);
+      if (result.success) {
+        toast.success('Document queued for reprocessing');
+      } else {
+        toast.error(result.error || 'Failed to reprocess');
+      }
+      return result;
+    },
+    null
+  );
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {/* Reprocess option */}
+        <DropdownMenuItem
+          disabled={isReprocessing}
+          onClick={(e) => {
+            e.stopPropagation();
+            startTransition(reprocessAction);
+          }}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+          {isReprocessing ? 'Reprocessing...' : 'Reprocess'}
+        </DropdownMenuItem>
+        
+        {/* Delete option - only if canDelete */}
+        {canDelete && (
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteClick(document);
+            }}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function DocumentList({ initialDocuments, organizationId, canDelete }: DocumentListProps) {
   const [documents, setDocuments] = React.useState<Document[]>(initialDocuments);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
 
-  // Delete state
+  // Delete dialog state (just for the dialog, not the action)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [documentToDelete, setDocumentToDelete] = React.useState<Document | null>(null);
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [documentsToDelete, setDocumentsToDelete] = React.useState<Document[]>([]);
+
+  // useActionState for export
+  const [, exportAction, isExporting] = useActionState(async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    if (selectedRows.length === 0) return null;
+
+    const docsToExport = selectedRows.map((row) => row.original);
+
+    try {
+      await exportBulkToZip(docsToExport);
+      const completedCount = docsToExport.filter(
+        (d) => d.status === 'completed' && d.extractedData
+      ).length;
+      toast.success(`Exported ${completedCount} document(s) as ZIP`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Export failed');
+    }
+    return null;
+  }, null);
+
+  // useActionState for delete
+  const [, deleteAction, isDeleting] = useActionState(async () => {
+    if (documentsToDelete.length === 0) return null;
+
+    const results = await Promise.all(
+      documentsToDelete.map((doc) => deleteDocumentAction(doc.id))
+    );
+
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.length - successCount;
+
+    if (successCount > 0) {
+      const deletedIds = documentsToDelete
+        .filter((_, i) => results[i].success)
+        .map((d) => d.id);
+      setDocuments((prev) => prev.filter((d) => !deletedIds.includes(d.id)));
+      setRowSelection({});
+      toast.success(`Deleted ${successCount} document(s)`);
+    }
+    if (failCount > 0) {
+      toast.error(`Failed to delete ${failCount} document(s)`);
+    }
+
+    setDeleteDialogOpen(false);
+    setDocumentsToDelete([]);
+    return null;
+  }, null);
 
   // Sync when initialDocuments prop changes
   React.useEffect(() => {
@@ -251,41 +365,20 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
           </span>
         ),
       },
-      ...(canDelete
-        ? [
-            {
-              id: 'actions',
-              enableHiding: false,
-              cell: ({ row }: { row: { original: Document } }) => (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDocumentToDelete(row.original);
-                        setDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ),
-            },
-          ]
-        : []),
+      {
+        id: 'actions',
+        enableHiding: false,
+        cell: ({ row }) => (
+          <RowActions
+            document={row.original}
+            canDelete={canDelete}
+            onDeleteClick={(doc) => {
+              setDocumentsToDelete([doc]);
+              setDeleteDialogOpen(true);
+            }}
+          />
+        ),
+      },
     ],
     [canDelete]
   );
@@ -303,38 +396,12 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
     state: { sorting, columnFilters, rowSelection },
   });
 
-  // Export handler - exports detailed data as ZIP
-  const handleExport = async () => {
+  // Bulk delete handler - just opens the dialog
+  const handleBulkDelete = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const docsToExport =
-      selectedRows.length > 0 ? selectedRows.map((row) => row.original) : documents;
-
-    try {
-      await exportBulkToZip(docsToExport);
-      const completedCount = docsToExport.filter(
-        (d) => d.status === 'completed' && d.extractedData
-      ).length;
-      toast.success(`Exported ${completedCount} document(s) as ZIP`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Export failed');
-    }
-  };
-
-  // Delete handler
-  const handleDeleteConfirm = async () => {
-    if (!documentToDelete) return;
-    setIsDeleting(true);
-    const result = await deleteDocumentAction(documentToDelete.id);
-    setIsDeleting(false);
-
-    if (result.success) {
-      toast.success('Document deleted successfully');
-      setDocuments((prev) => prev.filter((d) => d.id !== documentToDelete.id));
-    } else {
-      toast.error(result.error || 'Failed to delete document');
-    }
-    setDeleteDialogOpen(false);
-    setDocumentToDelete(null);
+    if (selectedRows.length === 0) return;
+    setDocumentsToDelete(selectedRows.map((row) => row.original));
+    setDeleteDialogOpen(true);
   };
 
   if (documents.length === 0) {
@@ -406,11 +473,29 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
             </SelectContent>
           </Select>
 
-          {/* Export Button - pushed to right */}
-          <Button variant="outline" onClick={handleExport} className="ml-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export {selectedCount > 0 && `(${selectedCount})`}
-          </Button>
+          {/* Bulk Actions - only show when items are selected */}
+          {selectedCount > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              {canDelete && (
+                <Button variant="outline" onClick={handleBulkDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete ({selectedCount})
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => startTransition(exportAction)}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {isExporting ? 'Exporting...' : `Export (${selectedCount})`}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -477,20 +562,40 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
         </div>
       </div>
 
-      {/* Delete Dialog */}
+      {/* Delete Dialog - updated for useActionState */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {documentsToDelete.length === 1 ? 'Document' : 'Documents'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{documentToDelete?.fileName}&quot;? This action
-              cannot be undone.
+              {documentsToDelete.length === 1 ? (
+                <>
+                  Are you sure you want to delete &quot;{documentsToDelete[0]?.fileName}&quot;? This action cannot be undone.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete {documentsToDelete.length} documents? This action cannot be undone.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
+            <Button
+              variant="destructive"
+              onClick={() => startTransition(deleteAction)}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                `Delete${documentsToDelete.length > 1 ? ` (${documentsToDelete.length})` : ''}`
+              )}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

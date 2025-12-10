@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Download,
   FileQuestion,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,10 @@ import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/document
 
 import { exportToCSV } from '@/lib/documents/export-csv';
 import Image from 'next/image';
+import { useActionState, startTransition } from 'react';
+import { reprocessDocument } from '@/lib/documents/actions';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 type Document = Database['public']['Tables']['documents']['Row'];
 
@@ -37,6 +42,22 @@ interface DocumentDetailProps {
 
 export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
   const [activeTab, setActiveTab] = useState('extracted');
+  const router = useRouter();
+  
+  // useActionState for reprocess action
+  const [reprocessState, reprocessAction, isReprocessing] = useActionState(
+    async () => {
+      const result = await reprocessDocument(document.id);
+      if (result.success) {
+        toast.success('Document queued for reprocessing');
+        router.refresh();
+      } else {
+        toast.error(result.error || 'Failed to reprocess');
+      }
+      return result;
+    },
+    null
+  );
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -177,6 +198,17 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
               </a>
             </Button>
           )}
+
+          {/* Reprocess button using useActionState pattern */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => startTransition(reprocessAction)}
+            disabled={isReprocessing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+            {isReprocessing ? 'Reprocessing...' : 'Reprocess'}
+          </Button>
         </div>
       </div>
 

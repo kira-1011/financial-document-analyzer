@@ -7,6 +7,8 @@ export const processDocument = task({
   run: async (payload: { documentId: string }, { ctx }) => {
     const runId = ctx.run.id;
 
+    console.log('processDocument runId', runId);
+
     // 1. Fetch document
     const document = await fetchDocument(payload.documentId);
 
