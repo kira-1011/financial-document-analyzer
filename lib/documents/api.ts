@@ -12,10 +12,12 @@ export async function fetchDocuments(organizationId: string): Promise<DocumentWi
   try {
     const { data, error } = await supabase
       .from('documents')
-      .select(`
+      .select(
+        `
         *,
         uploadedBy:user!uploadedBy(name, email, id)
-      `)
+      `
+      )
       .eq('organizationId', organizationId)
       .order('createdAt', { ascending: false });
 
