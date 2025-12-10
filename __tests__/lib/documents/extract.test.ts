@@ -105,10 +105,7 @@ describe('extractDocument', () => {
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
-      const result = await extractDocument(
-        'https://example.com/statement.pdf',
-        'application/pdf'
-      );
+      const result = await extractDocument('https://example.com/statement.pdf', 'application/pdf');
 
       expect(result.classification.documentType).toBe('bank_statement');
       expect((result.extractedData as BankStatementData).bank_name).toBe('Test Bank');
