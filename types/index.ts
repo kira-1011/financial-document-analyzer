@@ -98,3 +98,13 @@ export type UploadDocumentState = {
     documentType?: string[];
   };
 };
+
+// Create Organization Types
+export type CreateOrgState = {
+  success?: boolean;
+  message?: string;
+  errors?: {
+    name?: string[];
+    slug?: string[];
+  };
+};

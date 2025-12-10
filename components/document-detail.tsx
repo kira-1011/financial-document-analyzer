@@ -29,7 +29,7 @@ import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/document
 import { exportToCSV } from '@/lib/documents/export-csv';
 import Image from 'next/image';
 import { useActionState, startTransition } from 'react';
-import { reprocessDocument } from '@/lib/documents/actions';
+import { reprocessDocument } from '@/app/(dashboard)/documents/actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -45,7 +45,7 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
   const router = useRouter();
 
   // useActionState for reprocess action
-  const [reprocessState, reprocessAction, isReprocessing] = useActionState(async () => {
+  const [_reprocessState, reprocessAction, isReprocessing] = useActionState(async () => {
     const result = await reprocessDocument(document.id);
     if (result.success) {
       toast.success('Document queued for reprocessing');
