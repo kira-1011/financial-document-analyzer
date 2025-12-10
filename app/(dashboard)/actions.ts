@@ -4,7 +4,13 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { deleteDocument, fetchDocument } from '@/lib/documents/api';
+import { runs } from '@trigger.dev/sdk/v3';
 import type { CreateOrgState } from '@/types';
+
+// ============================================================================
+// Organization Actions
+// ============================================================================
 
 const createOrgSchema = z.object({
   name: z
@@ -22,7 +28,6 @@ export async function createOrganizationAction(
   prevState: CreateOrgState,
   formData: FormData
 ): Promise<CreateOrgState> {
-  // Validate input
   const validatedFields = createOrgSchema.safeParse({
     name: formData.get('name'),
     slug: formData.get('slug'),
@@ -37,7 +42,6 @@ export async function createOrganizationAction(
   const { name, slug } = validatedFields.data;
 
   try {
-    // Check if slug is already taken
     const slugCheck = await auth.api.checkOrganizationSlug({
       body: { slug },
       headers: await headers(),
@@ -49,7 +53,6 @@ export async function createOrganizationAction(
       };
     }
 
-    // Create organization using Better Auth API
     await auth.api.createOrganization({
       headers: await headers(),
       body: {
@@ -69,5 +72,56 @@ export async function createOrganizationAction(
     return {
       message: 'Failed to create organization. Please try again.',
     };
+  }
+}
+
+// ============================================================================
+// Document Actions
+// ============================================================================
+
+export async function deleteDocumentAction(
+  documentId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const hasPermission = await auth.api.hasPermission({
+      headers: await headers(),
+      body: {
+        permissions: {
+          document: ['delete'],
+        },
+      },
+    });
+
+    if (!hasPermission.success) {
+      return { success: false, error: "You don't have permission to delete documents" };
+    }
+
+    await deleteDocument(documentId);
+    revalidatePath('/documents');
+
+    return { success: true };
+  } catch (error) {
+    console.error('[deleteDocumentAction] Error:', error);
+    return { success: false, error: 'Failed to delete document' };
+  }
+}
+
+export async function reprocessDocument(
+  documentId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const document = await fetchDocument(documentId);
+    if (!document) {
+      return { success: false, error: 'Document not found' };
+    }
+
+    if (document.runId) {
+      await runs.replay(document.runId);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('[reprocessDocumentAction] Error:', error);
+    return { success: false, error: 'Failed to reprocess document' };
   }
 }

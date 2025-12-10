@@ -29,7 +29,7 @@ import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/document
 import { exportToCSV } from '@/lib/documents/export-csv';
 import Image from 'next/image';
 import { useActionState, startTransition } from 'react';
-import { reprocessDocument } from '@/app/(dashboard)/documents/actions';
+import { reprocessDocument } from '@/app/(dashboard)/actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 

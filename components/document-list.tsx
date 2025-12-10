@@ -32,7 +32,7 @@ import {
 
 import { usePolling } from '@/hooks/use-polling';
 import { fetchDocumentStatuses, type DocumentStatus } from '@/lib/documents/api-client';
-import { deleteDocumentAction, reprocessDocument } from '@/app/(dashboard)/documents/actions';
+import { deleteDocumentAction, reprocessDocument } from '@/app/(dashboard)/actions';
 import { exportBulkToZip } from '@/lib/documents/export-csv';
 import {
   DOCUMENT_TYPE_LABELS,
