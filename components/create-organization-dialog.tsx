@@ -28,7 +28,7 @@ interface CreateOrganizationDialogProps {
 
 export function CreateOrganizationDialog({ open, onOpenChange }: CreateOrganizationDialogProps) {
   const router = useRouter();
-  
+
   // Key counter to reset form state when dialog opens
   const [formKey, setFormKey] = React.useState(0);
 

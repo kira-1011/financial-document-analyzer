@@ -55,7 +55,7 @@ export function UploadDocumentDialog() {
   };
 
   // Handle state changes
-  const prevStateRef =  useRef(state);
+  const prevStateRef = useRef(state);
   useEffect(() => {
     if (prevStateRef.current === state) return;
     prevStateRef.current = state;
