@@ -4,9 +4,8 @@ import { fetchDocument, updateDocument, getSignedUrlForFile } from '@/lib/docume
 
 export const processDocument = task({
   id: 'process-document',
-  run: async (payload: { documentId: string }, {ctx}) => {
-    
-    const runId = ctx.run.id; 
+  run: async (payload: { documentId: string }, { ctx }) => {
+    const runId = ctx.run.id;
 
     // 1. Fetch document
     const document = await fetchDocument(payload.documentId);
@@ -19,7 +18,7 @@ export const processDocument = task({
     await updateDocument(payload.documentId, {
       status: 'processing',
       processedAt: new Date().toISOString(),
-      runId
+      runId,
     });
 
     try {
