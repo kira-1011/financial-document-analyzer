@@ -27,6 +27,7 @@ import {
   Download,
   ArrowUpDown,
   RefreshCw,
+  User,
 } from 'lucide-react';
 
 import { usePolling } from '@/hooks/use-polling';
@@ -39,7 +40,7 @@ import {
   DOCUMENT_TYPES,
   DOCUMENT_STATUS,
 } from '@/lib/documents/constants';
-import type { Database } from '@/types/supabase';
+import type { DocumentWithUploadedBy } from '@/lib/documents/api';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -76,7 +77,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type Document = Database['public']['Tables']['documents']['Row'];
+type Document = DocumentWithUploadedBy;
 
 interface DocumentListProps {
   initialDocuments: Document[];
@@ -357,6 +358,23 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
             {formatDistanceToNow(new Date(row.getValue('createdAt')), { addSuffix: true })}
           </span>
         ),
+      },
+      {
+        accessorKey: 'uploadedBy',
+        header: 'Uploaded By',
+        cell: ({ row }) => {
+          const uploadedBy = row.original.uploadedBy;
+          return uploadedBy ? (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="truncate max-w-[120px]" title={uploadedBy.email}>
+                {uploadedBy.name || uploadedBy.email}
+              </span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          );
+        },
       },
       {
         id: 'actions',

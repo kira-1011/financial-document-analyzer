@@ -3,11 +3,19 @@ import type { Database } from '@/types/supabase';
 
 export type Document = Database['public']['Tables']['documents']['Row'];
 
-export async function fetchDocuments(organizationId: string): Promise<Document[]> {
+// Add new type for document with uploader info
+export type DocumentWithUploadedBy = Document & {
+  uploadedBy: { name: string; email: string; id: string } | null;
+};
+
+export async function fetchDocuments(organizationId: string): Promise<DocumentWithUploadedBy[]> {
   try {
     const { data, error } = await supabase
       .from('documents')
-      .select('*')
+      .select(`
+        *,
+        uploadedBy:user!uploadedBy(name, email, id)
+      `)
       .eq('organizationId', organizationId)
       .order('createdAt', { ascending: false });
 
@@ -16,7 +24,7 @@ export async function fetchDocuments(organizationId: string): Promise<Document[]
       throw new Error('Failed to fetch documents');
     }
 
-    return data || [];
+    return (data || []) as DocumentWithUploadedBy[];
   } catch (error) {
     console.error('[fetchDocuments] Error:', error);
     throw error;
