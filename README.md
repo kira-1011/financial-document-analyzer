@@ -150,6 +150,7 @@ pnpm test:run
 ```
 
 Tests are located in the `__tests__/` directory and cover:
+
 - Document schemas validation
 - CSV export functions
 - AI extraction service (mocked)
