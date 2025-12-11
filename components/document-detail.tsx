@@ -32,6 +32,7 @@ import { useActionState, startTransition } from 'react';
 import { reprocessDocument } from '@/app/(dashboard)/actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Document = Database['public']['Tables']['documents']['Row'];
 
@@ -157,11 +158,27 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-bold truncate max-w-[400px]">{document.fileName}</h1>
-              <Badge variant={getStatusBadgeVariant(document.status)} className="gap-1">
-                {getStatusIcon(document.status)}
-                {DOCUMENT_STATUS_LABELS[document.status as keyof typeof DOCUMENT_STATUS_LABELS] ||
-                  document.status}
-              </Badge>
+              {document.errorMessage ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant={getStatusBadgeVariant(document.status)} className="gap-1">
+                      {getStatusIcon(document.status)}
+                      {DOCUMENT_STATUS_LABELS[
+                        document.status as keyof typeof DOCUMENT_STATUS_LABELS
+                      ] || document.status}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>{document.errorMessage}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Badge variant={getStatusBadgeVariant(document.status)} className="gap-1">
+                  {getStatusIcon(document.status)}
+                  {DOCUMENT_STATUS_LABELS[document.status as keyof typeof DOCUMENT_STATUS_LABELS] ||
+                    document.status}
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
               {document.documentType && (

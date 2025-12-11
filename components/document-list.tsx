@@ -76,6 +76,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Document = DocumentWithUploadedBy;
 
@@ -328,12 +329,27 @@ export function DocumentList({ initialDocuments, organizationId, canDelete }: Do
         header: 'Status',
         cell: ({ row }) => {
           const status = row.getValue('status') as string;
-          return (
+          const errorMessage = row.original.errorMessage;
+
+          const badge = (
             <Badge variant={getStatusBadgeVariant(status)} className="gap-1">
               {getStatusIcon(status)}
               {DOCUMENT_STATUS_LABELS[status as keyof typeof DOCUMENT_STATUS_LABELS] || status}
             </Badge>
           );
+
+          if (errorMessage) {
+            return (
+              <Tooltip>
+                <TooltipTrigger asChild>{badge}</TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>{errorMessage}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return badge;
         },
       },
       {
