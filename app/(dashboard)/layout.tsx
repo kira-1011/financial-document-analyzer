@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { AIChat } from '@/components/ai-chat';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({
@@ -33,7 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         organizations={organizations || []}
         activeOrganization={activeOrganization}
       />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        {children}
+        <AIChat />
+      </SidebarInset>
     </SidebarProvider>
   );
 }
