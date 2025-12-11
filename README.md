@@ -158,25 +158,30 @@ Tests are located in the `__tests__/` directory and cover:
 
 ## Linting & Formatting
 
+This project uses [Biome](https://biomejs.dev/) for linting and formatting — a fast, unified toolchain written in Rust.
+
 ```bash
-# Lint code
-pnpm lint
+# Lint and format (all-in-one)
+pnpm exec biome check --write
 
-# Format code
-pnpm format
+# Lint only
+pnpm exec biome lint .
 
-# Check formatting (CI)
-pnpm format:check
+# Format only
+pnpm exec biome format --write .
+
+# Check without writing (CI)
+pnpm exec biome ci .
 ```
 
-Pre-commit hooks run automatically via Husky + lint-staged.
+Pre-commit hooks run automatically via Husky.
 
 ## CI/CD
 
 GitHub Actions workflows run on every PR and push to `main`:
 
 - **Test** (`test.yml`) — Runs Vitest unit tests
-- **Lint & Format** (`lint.yml`) — Runs ESLint and Prettier checks
+- **Lint & Format** (`lint.yml`) — Runs Biome checks
 
 Branch protection rules ensure all checks pass before merging.
 
@@ -237,7 +242,7 @@ CREATE TABLE documents (
 ```
 ├── .github/
 │   └── workflows/                 # CI/CD pipelines
-│       ├── lint.yml               # ESLint & Prettier checks
+│       ├── lint.yml               # Biome lint & format checks
 │       └── test.yml               # Vitest unit tests
 ├── __tests__/                     # Unit tests
 │   ├── components/                # Component tests
@@ -309,7 +314,7 @@ CREATE TABLE documents (
 │   └── migrations/                # Database migrations
 ├── vitest.config.mts              # Vitest configuration
 ├── vitest.setup.ts                # Test setup file
-├── eslint.config.mjs              # ESLint configuration
+├── biome.json                     # Biome linting & formatting config
 └── trigger.config.ts              # Trigger.dev configuration
 ```
 
