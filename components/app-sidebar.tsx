@@ -10,6 +10,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/compone
 import { OrganizationSwitcher } from '@/components/organization-switcher';
 import { Brand } from '@/components/brand';
 import { ModeToggle } from './mode-toggle';
+import type { Organization, ActiveOrganization } from '@/lib/auth-types';
 
 const data = {
   navMain: [
@@ -20,15 +21,6 @@ const data = {
   navSecondary: [],
 };
 
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  logo?: string | null;
-  createdAt: Date;
-  metadata?: Record<string, unknown> | null;
-}
-
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
     name: string;
@@ -36,7 +28,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     image?: string | null;
   };
   organizations: Organization[];
-  activeOrganization: Organization | null;
+  activeOrganization: ActiveOrganization | null;
 }
 
 export function AppSidebar({ user, organizations, activeOrganization, ...props }: AppSidebarProps) {
