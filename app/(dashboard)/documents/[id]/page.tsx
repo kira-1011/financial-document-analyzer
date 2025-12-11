@@ -1,7 +1,5 @@
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { redirect, notFound } from 'next/navigation';
-import { fetchDocument, getSignedUrlForFile } from '@/lib/documents/api';
+import { notFound, redirect } from 'next/navigation';
 import { DocumentDetail } from '@/components/document-detail';
 import {
   Breadcrumb,
@@ -13,6 +11,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { auth } from '@/lib/auth';
+import { fetchDocument, getSignedUrlForFile } from '@/lib/documents/api';
 
 interface PageProps {
   params: Promise<{ id: string }>;

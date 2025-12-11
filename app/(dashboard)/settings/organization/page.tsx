@@ -1,8 +1,8 @@
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { OrganizationForm } from '@/components/organization-form';
-import { UserRole } from '@/lib/auth-types';
+import { auth } from '@/lib/auth';
+import type { UserRole } from '@/lib/auth-types';
 
 export default async function OrganizationSettingsPage() {
   const session = await auth.api.getSession({

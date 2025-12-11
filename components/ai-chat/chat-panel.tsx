@@ -1,32 +1,32 @@
 'use client';
 
+import { Bot, Copy, RefreshCw, Sparkles } from 'lucide-react';
+import { nanoid } from 'nanoid';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
+import { Loader } from '@/components/ai-elements/loader';
 import {
   Message,
-  MessageContent,
-  MessageResponse,
   MessageAction,
   MessageActions,
+  MessageContent,
+  MessageResponse,
 } from '@/components/ai-elements/message';
-import { Suggestions, Suggestion } from '@/components/ai-elements/suggestion';
-import { Loader } from '@/components/ai-elements/loader';
 import {
   PromptInput,
   PromptInputBody,
   PromptInputFooter,
+  type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
-  type PromptInputMessage,
 } from '@/components/ai-elements/prompt-input';
-import { Sparkles, Bot, Copy, RefreshCw } from 'lucide-react';
-import { nanoid } from 'nanoid';
+import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ChatPanelProps {
   open: boolean;

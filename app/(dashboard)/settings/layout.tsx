@@ -1,5 +1,4 @@
 import { SettingsNav } from '@/components/settings-nav';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,6 +6,7 @@ import {
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   // No auth check needed - parent (dashboard) layout handles it

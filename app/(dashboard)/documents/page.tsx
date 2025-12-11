@@ -1,8 +1,5 @@
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { fetchDocuments } from '@/lib/documents/api';
-import { UploadDocumentDialog } from '@/components/upload-document-dialog';
 import { DocumentList } from '@/components/document-list';
 import {
   Breadcrumb,
@@ -14,6 +11,9 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { UploadDocumentDialog } from '@/components/upload-document-dialog';
+import { auth } from '@/lib/auth';
+import { fetchDocuments } from '@/lib/documents/api';
 
 export default async function DocumentsPage() {
   const session = await auth.api.getSession({

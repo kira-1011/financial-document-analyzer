@@ -1,10 +1,10 @@
 'use server';
 
+import { APIError } from 'better-auth/api';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import { APIError } from 'better-auth/api';
 import type { LoginState, SignupState } from '@/types';
 
 const loginSchema = z.object({

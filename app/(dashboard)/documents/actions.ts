@@ -1,10 +1,10 @@
 'use server';
 
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import { revalidatePath } from 'next/cache';
-import { deleteDocument, fetchDocument } from '@/lib/documents/api';
 import { runs } from '@trigger.dev/sdk/v3';
+import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { deleteDocument, fetchDocument } from '@/lib/documents/api';
 
 export async function deleteDocumentAction(
   documentId: string

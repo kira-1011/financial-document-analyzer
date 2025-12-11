@@ -1,13 +1,13 @@
 'use server';
 
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import { revalidatePath } from 'next/cache';
 import { tasks } from '@trigger.dev/sdk/v3';
-import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './constants';
-import type { UploadDocumentState } from '@/types';
-import { processDocument } from '@/trigger/process-document';
+import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
 import { createDocument, uploadFileToStorage } from '@/lib/documents/api';
+import type { processDocument } from '@/trigger/process-document';
+import type { UploadDocumentState } from '@/types';
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './constants';
 
 // Single file upload - used by batch upload
 export async function uploadSingleDocument(file: File): Promise<{

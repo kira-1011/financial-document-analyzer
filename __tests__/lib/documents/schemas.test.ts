@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   bankStatementSchema,
-  invoiceSchema,
-  receiptSchema,
   bankStatementTransactionSchema,
   invoiceLineItemSchema,
+  invoiceSchema,
   receiptItemSchema,
+  receiptSchema,
 } from '@/lib/documents/schemas';
 
 describe('Document Schemas', () => {

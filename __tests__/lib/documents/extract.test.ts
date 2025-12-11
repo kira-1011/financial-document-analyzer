@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import type { GenerateObjectResult } from 'ai';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 // Mock the 'ai' module
 vi.mock('ai', () => ({
@@ -11,9 +11,9 @@ vi.mock('@ai-sdk/google', () => ({
   google: vi.fn(() => 'mocked-model'),
 }));
 
+import { generateObject } from 'ai';
 import { extractDocument, type RouterResult } from '@/lib/documents/extract';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
-import { generateObject } from 'ai';
 
 // Helper to create properly typed mock responses
 function createMockResponse<T>(object: T): Partial<GenerateObjectResult<T>> {

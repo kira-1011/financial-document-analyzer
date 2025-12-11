@@ -1,16 +1,16 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { loginAction } from '@/app/(auth)/actions';
-import type { LoginState } from '@/types';
 import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useActionState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { loginAction } from '@/app/(auth)/actions';
+import { Button } from '@/components/ui/button';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import type { LoginState } from '@/types';
 
 const initialState: LoginState = {};
 

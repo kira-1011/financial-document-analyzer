@@ -1,13 +1,14 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { Loader2, Lock, Trash2, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Loader2, User, Lock, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useActionState, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import {
+  changePasswordAction,
+  deleteAccountAction,
+  updateProfileAction,
+} from '@/app/(dashboard)/settings/profile/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,14 +20,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
-import type { ProfileState, PasswordState, DeleteAccountState } from '@/types';
-import {
-  updateProfileAction,
-  changePasswordAction,
-  deleteAccountAction,
-} from '@/app/(dashboard)/settings/profile/actions';
-import type { ProfileFormProps } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { DeleteAccountState, PasswordState, ProfileFormProps, ProfileState } from '@/types';
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();

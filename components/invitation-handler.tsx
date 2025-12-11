@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { CheckIcon, Loader2, XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { CheckIcon, XIcon, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,7 +15,6 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { authClient, organization } from '@/lib/auth-client';
-import { toast } from 'sonner';
 import type { Invitation } from '@/lib/auth-types';
 
 interface InvitationHandlerProps {

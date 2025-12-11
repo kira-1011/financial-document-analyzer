@@ -1,38 +1,36 @@
 'use client';
 
-import { useState } from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import {
   ArrowLeft,
-  FileText,
   CheckCircle,
-  XCircle,
   Clock,
-  Loader2,
-  ExternalLink,
   Download,
+  ExternalLink,
   FileQuestion,
+  FileText,
+  Loader2,
   RefreshCw,
+  XCircle,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DOCUMENT_TYPE_LABELS, DOCUMENT_STATUS_LABELS } from '@/lib/documents/constants';
+import { useRouter } from 'next/navigation';
+import { startTransition, useActionState, useState } from 'react';
+import { toast } from 'sonner';
+import { reprocessDocument } from '@/app/(dashboard)/actions';
 import { BankStatementView } from '@/components/extracted-data/bank-statement-view';
 import { InvoiceView } from '@/components/extracted-data/invoice-view';
 import { ReceiptView } from '@/components/extracted-data/receipt-view';
-import type { Database } from '@/types/supabase';
-import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
-
-import { exportToCSV } from '@/lib/documents/export-csv';
-import Image from 'next/image';
-import { useActionState, startTransition } from 'react';
-import { reprocessDocument } from '@/app/(dashboard)/actions';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DOCUMENT_STATUS_LABELS, DOCUMENT_TYPE_LABELS } from '@/lib/documents/constants';
+import { exportToCSV } from '@/lib/documents/export-csv';
+import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
+import type { Database } from '@/types/supabase';
 
 type Document = Database['public']['Tables']['documents']['Row'];
 
@@ -87,9 +85,9 @@ export function DocumentDetail({ document, fileUrl }: DocumentDetailProps) {
 
   const formatFileSize = (bytes: number | null) => {
     if (!bytes) return '-';
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const handleExportCSV = () => {

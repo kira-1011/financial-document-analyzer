@@ -1,6 +1,6 @@
 import { task } from '@trigger.dev/sdk/v3';
+import { fetchDocument, getSignedUrlForFile, updateDocument } from '@/lib/documents/api';
 import { extractDocument } from '@/lib/documents/extract';
-import { fetchDocument, updateDocument, getSignedUrlForFile } from '@/lib/documents/api';
 
 export const processDocument = task({
   id: 'process-document',

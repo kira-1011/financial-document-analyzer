@@ -1,6 +1,6 @@
 import { CheckCircle } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Brand } from '@/components/brand';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

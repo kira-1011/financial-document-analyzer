@@ -1,16 +1,15 @@
 'use client';
 
-import * as React from 'react';
 import { FileText, LayoutDashboard, Settings } from 'lucide-react';
-
+import type * as React from 'react';
+import { Brand } from '@/components/brand';
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
 import { OrganizationSwitcher } from '@/components/organization-switcher';
-import { Brand } from '@/components/brand';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
+import type { ActiveOrganization, Organization } from '@/lib/auth-types';
 import { ModeToggle } from './mode-toggle';
-import type { Organization, ActiveOrganization } from '@/lib/auth-types';
 
 const data = {
   navMain: [

@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  DOCUMENT_TYPES,
-  DOCUMENT_STATUS,
   ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE,
-  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_STATUS,
   DOCUMENT_STATUS_LABELS,
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPES,
+  MAX_FILE_SIZE,
 } from '@/lib/documents/constants';
 
 describe('Document Constants', () => {

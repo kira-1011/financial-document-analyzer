@@ -1,14 +1,17 @@
 'use client';
 
-import { useActionState, useEffect, useState, useTransition } from 'react';
+import { Building2, Loader2, Mail, MoreHorizontal, Trash2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Building2, Users, Mail, Trash2, MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useActionState, useEffect, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import {
+  cancelInvitationAction,
+  deleteOrganizationAction,
+  removeMemberAction,
+  updateMemberRoleAction,
+  updateOrganizationAction,
+} from '@/app/(dashboard)/settings/organization/actions';
+import { InviteMemberDialog } from '@/components/invite-member-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +23,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,17 +34,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
-import { InviteMemberDialog } from '@/components/invite-member-dialog';
-import {
-  updateOrganizationAction,
-  updateMemberRoleAction,
-  removeMemberAction,
-  cancelInvitationAction,
-  deleteOrganizationAction,
-} from '@/app/(dashboard)/settings/organization/actions';
-import type { OrgState } from '@/types';
-import type { OrganizationFormProps } from '@/types';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { OrganizationFormProps, OrgState } from '@/types';
 
 export function OrganizationForm({
   organization,

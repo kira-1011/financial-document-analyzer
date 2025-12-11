@@ -1,6 +1,6 @@
-import type { BankStatementData, InvoiceData, ReceiptData } from './schemas';
 import JSZip from 'jszip';
 import type { Database } from '@/types/supabase';
+import type { BankStatementData, InvoiceData, ReceiptData } from './schemas';
 
 type Document = Database['public']['Tables']['documents']['Row'];
 

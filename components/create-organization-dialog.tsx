@@ -1,11 +1,12 @@
 'use client';
 
-import * as React from 'react';
-import { useActionState, useEffect } from 'react';
 import { Building2, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { useActionState, useEffect } from 'react';
 import { toast } from 'sonner';
-
+import { createOrganizationAction } from '@/app/(dashboard)/actions';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -15,10 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { createOrganizationAction } from '@/app/(dashboard)/actions';
 import type { CreateOrgState } from '@/types';
 
 interface CreateOrganizationDialogProps {

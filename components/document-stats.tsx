@@ -1,12 +1,12 @@
 import {
-  FileText,
   CheckCircle,
-  Loader2,
-  XCircle,
-  Landmark,
   FileSpreadsheet,
-  Receipt,
+  FileText,
   HelpCircle,
+  Landmark,
+  Loader2,
+  Receipt,
+  XCircle,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DocumentStats } from '@/lib/documents/api';

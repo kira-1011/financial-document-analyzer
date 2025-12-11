@@ -1,9 +1,9 @@
 import { betterAuth } from 'better-auth';
-import { organization } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
+import { organization } from 'better-auth/plugins';
 import { Pool } from 'pg';
-import { ac, owner, admin, member } from '@/lib/permissions';
 import { sendInvitationEmail } from '@/lib/email/send-email';
+import { ac, admin, member, owner } from '@/lib/permissions';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

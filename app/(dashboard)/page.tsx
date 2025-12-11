@@ -1,19 +1,19 @@
-import { auth } from '@/lib/auth';
+import { FileText, Upload } from 'lucide-react';
 import { headers } from 'next/headers';
-import { fetchDocumentStats } from '@/lib/documents/api';
+import Link from 'next/link';
+import { DocumentStatsCards } from '@/components/document-stats';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Upload } from 'lucide-react';
-import Link from 'next/link';
 import { UploadDocumentDialog } from '@/components/upload-document-dialog';
-import { DocumentStatsCards } from '@/components/document-stats';
+import { auth } from '@/lib/auth';
+import { fetchDocumentStats } from '@/lib/documents/api';
 
 export default async function Home() {
   const session = await auth.api.getSession({

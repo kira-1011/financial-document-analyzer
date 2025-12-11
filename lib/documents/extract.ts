@@ -1,8 +1,8 @@
-import { generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
+import { generateObject } from 'ai';
 import { z } from 'zod';
+import { EXTRACTION_PROMPTS, ROUTER_SYSTEM_PROMPT } from './prompts';
 import { bankStatementSchema, invoiceSchema, receiptSchema } from './schemas';
-import { ROUTER_SYSTEM_PROMPT, EXTRACTION_PROMPTS } from './prompts';
 
 const DEFAULT_AI_MODEL = 'gemini-2.5-flash-lite';
 

@@ -1,8 +1,8 @@
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { Brand } from '@/components/brand';
 import { InvitationHandler } from '@/components/invitation-handler';
 import { InvitationError } from '@/components/invitiation-error';
-import { Brand } from '@/components/brand';
+import { auth } from '@/lib/auth';
 
 interface PageProps {
   params: Promise<{ id: string }>;

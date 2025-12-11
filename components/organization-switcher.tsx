@@ -1,8 +1,10 @@
 'use client';
 
-import * as React from 'react';
-import { ChevronsUpDown, Plus, Building2 } from 'lucide-react';
+import { Building2, ChevronsUpDown, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { toast } from 'sonner';
+import { CreateOrganizationDialog } from '@/components/create-organization-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +20,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { organization } from '@/lib/auth-client';
-import { toast } from 'sonner';
-import { CreateOrganizationDialog } from '@/components/create-organization-dialog';
-import type { Organization } from '@/lib/auth-types';
-import type { ActiveOrganization } from '@/lib/auth-types';
+import type { ActiveOrganization, Organization } from '@/lib/auth-types';
+
 interface OrganizationSwitcherProps {
   organizations: Organization[];
   activeOrganization: ActiveOrganization | null;

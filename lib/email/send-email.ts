@@ -1,5 +1,5 @@
-import { resend } from './resend';
 import { reactInvitationEmail } from '@/components/email/invitation';
+import { resend } from './resend';
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'DocuFinance <onboarding@resend.dev>';
 

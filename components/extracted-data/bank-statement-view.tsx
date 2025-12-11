@@ -1,9 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
-import { TrendingUp, TrendingDown, Wallet, Building2, Calendar, User } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2, Calendar, TrendingDown, TrendingUp, User, Wallet } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,

@@ -1,57 +1,35 @@
 'use client';
 
-import * as React from 'react';
-import { useActionState, startTransition } from 'react';
 import {
-  ColumnDef,
-  ColumnFiltersState,
+  type ColumnDef,
+  type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { toast } from 'sonner';
 import {
-  FileText,
-  Clock,
+  ArrowUpDown,
   CheckCircle,
-  XCircle,
+  Clock,
+  Download,
+  FileText,
   Loader2,
   MoreHorizontal,
-  Trash2,
-  Download,
-  ArrowUpDown,
   RefreshCw,
+  Trash2,
   User,
+  XCircle,
 } from 'lucide-react';
-
-import { usePolling } from '@/hooks/use-polling';
-import { fetchDocumentStatuses, type DocumentStatus } from '@/lib/documents/api-client';
+import Link from 'next/link';
+import * as React from 'react';
+import { startTransition, useActionState } from 'react';
+import { toast } from 'sonner';
 import { deleteDocumentAction, reprocessDocument } from '@/app/(dashboard)/actions';
-import { exportBulkToZip } from '@/lib/documents/export-csv';
-import {
-  DOCUMENT_TYPE_LABELS,
-  DOCUMENT_STATUS_LABELS,
-  DOCUMENT_TYPES,
-  DOCUMENT_STATUS,
-} from '@/lib/documents/constants';
-import type { DocumentWithUploadedBy } from '@/lib/documents/api';
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -61,6 +39,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -69,14 +64,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { usePolling } from '@/hooks/use-polling';
+import type { DocumentWithUploadedBy } from '@/lib/documents/api';
+import { type DocumentStatus, fetchDocumentStatuses } from '@/lib/documents/api-client';
+import {
+  DOCUMENT_STATUS,
+  DOCUMENT_STATUS_LABELS,
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPES,
+} from '@/lib/documents/constants';
+import { exportBulkToZip } from '@/lib/documents/export-csv';
 
 type Document = DocumentWithUploadedBy;
 
@@ -119,9 +117,9 @@ const getStatusBadgeVariant = (
 
 const formatFileSize = (bytes: number | null) => {
   if (!bytes) return '-';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 // Create a separate RowActions component that uses useActionState

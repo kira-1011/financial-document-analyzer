@@ -1,9 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Store, Calendar, Clock, Receipt, CreditCard, Hash } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Clock, CreditCard, Hash, Receipt, Store } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,

@@ -1,12 +1,12 @@
 'use server';
 
+import { APIError } from 'better-auth/api';
+import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import type { ProfileState, PasswordState, DeleteAccountState } from '@/types';
-import { APIError } from 'better-auth/api';
+import type { DeleteAccountState, PasswordState, ProfileState } from '@/types';
 
 // Schemas
 const updateProfileSchema = z.object({

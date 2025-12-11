@@ -1,8 +1,10 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { CheckCircle, File, Loader2, Upload, X, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, File, X, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,11 +16,9 @@ import {
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { uploadSingleDocument } from '@/lib/documents/upload';
 import { MAX_FILE_SIZE } from '@/lib/documents/constants';
-import { useRouter } from 'next/navigation';
+import { uploadSingleDocument } from '@/lib/documents/upload';
+import { cn } from '@/lib/utils';
 
 type FileStatus = 'pending' | 'uploading' | 'success' | 'error';
 
@@ -119,7 +119,7 @@ export function UploadDocumentDialog() {
               : f
           )
         );
-      } catch (error) {
+      } catch (_error) {
         setFiles((prev) =>
           prev.map((f) =>
             f.id === fileWithStatus.id
@@ -164,9 +164,9 @@ export function UploadDocumentDialog() {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const getStatusIcon = (status: FileStatus) => {

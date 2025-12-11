@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { Loader2, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,8 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { authClient } from '@/lib/auth-client';
-import { toast } from 'sonner';
-import { UserPlus, Loader2 } from 'lucide-react';
 
 interface InviteMemberDialogProps {
   organizationId: string;
