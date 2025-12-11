@@ -56,6 +56,7 @@
 | [Supabase](https://supabase.com/)             | PostgreSQL database & file storage       | [Documentation](https://supabase.com/docs)            |
 | [Trigger.dev](https://trigger.dev/)           | Background job processing                | [Documentation](https://trigger.dev/docs)             |
 | [Resend](https://resend.com/)                 | Transactional emails                     | [Documentation](https://resend.com/docs)              |
+| [Vitest](https://vitest.dev/)                 | Fast unit testing framework              | [Documentation](https://vitest.dev/guide/)            |
 | [Zod](https://zod.dev/)                       | Schema validation                        | [Documentation](https://zod.dev/)                     |
 
 ## Getting Started
@@ -136,6 +137,24 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for unit testing.
+
+```bash
+# Run tests in watch mode
+pnpm test
+
+# Run tests once (CI)
+pnpm test:run
+```
+
+Tests are located in the `__tests__/` directory and cover:
+- Document schemas validation
+- CSV export functions
+- AI extraction service (mocked)
+- Component rendering
+
 ## Linting & Formatting
 
 ```bash
@@ -150,6 +169,15 @@ pnpm format:check
 ```
 
 Pre-commit hooks run automatically via Husky + lint-staged.
+
+## CI/CD
+
+GitHub Actions workflows run on every PR and push to `main`:
+
+- **Test** (`test.yml`) — Runs Vitest unit tests
+- **Lint & Format** (`lint.yml`) — Runs ESLint and Prettier checks
+
+Branch protection rules ensure all checks pass before merging.
 
 ## Environment Variables
 
@@ -206,13 +234,29 @@ CREATE TABLE documents (
 ## Project Structure
 
 ```
+├── .github/
+│   └── workflows/                 # CI/CD pipelines
+│       ├── lint.yml               # ESLint & Prettier checks
+│       └── test.yml               # Vitest unit tests
+├── __tests__/                     # Unit tests
+│   ├── components/                # Component tests
+│   │   └── brand.test.tsx
+│   └── lib/
+│       └── documents/             # Document logic tests
+│           ├── constants.test.ts
+│           ├── export-csv.test.ts
+│           ├── extract.test.ts
+│           └── schemas.test.ts
 ├── app/
 │   ├── (auth)/                    # Auth pages (login, signup)
+│   │   ├── actions.ts             # Auth server actions
 │   │   ├── login/
 │   │   └── signup/
 │   ├── (dashboard)/               # Protected dashboard pages
+│   │   ├── actions.ts             # Dashboard server actions
 │   │   ├── documents/             # Document list and detail views
-│   │   │   └── [id]/              # Single document view
+│   │   │   ├── [id]/              # Single document view
+│   │   │   └── actions.ts         # Document server actions
 │   │   └── settings/              # User and organization settings
 │   │       ├── profile/
 │   │       └── organization/
@@ -224,27 +268,48 @@ CREATE TABLE documents (
 │   │   ├── bank-statement-view.tsx
 │   │   ├── invoice-view.tsx
 │   │   └── receipt-view.tsx
-│   └── ui/                        # shadcn/ui components
+│   ├── ui/                        # shadcn/ui components
+│   ├── app-sidebar.tsx            # Main navigation sidebar
+│   ├── document-detail.tsx        # Document detail view
+│   ├── document-list.tsx          # Document list with actions
+│   ├── document-stats.tsx         # Dashboard statistics
+│   ├── organization-switcher.tsx  # Organization selector
+│   └── upload-document-dialog.tsx # File upload dialog
 ├── hooks/
 │   ├── use-mobile.ts              # Mobile detection hook
 │   └── use-polling.ts             # Polling hook for status updates
 ├── lib/
 │   ├── documents/                 # Document processing logic
-│   │   ├── extract.ts             # AI router + extraction workflow
-│   │   ├── schemas.ts             # Zod schemas for each doc type
-│   │   ├── prompts.ts             # System prompts for AI
-│   │   ├── upload.ts              # File upload handling
+│   │   ├── api.ts                 # Document API functions
+│   │   ├── api-client.ts          # Client-side API utilities
+│   │   ├── constants.ts           # Document types & status enums
 │   │   ├── export-csv.ts          # CSV export functionality
-│   │   └── api.ts                 # Document API functions
+│   │   ├── extract.ts             # AI router + extraction workflow
+│   │   ├── prompts.ts             # System prompts for AI
+│   │   ├── schemas.ts             # Zod schemas for each doc type
+│   │   └── upload.ts              # File upload handling
 │   ├── email/                     # Email sending utilities
+│   │   ├── resend.ts              # Resend client
+│   │   └── send-email.ts          # Email sending functions
 │   ├── supabase/                  # Supabase client setup
+│   │   ├── client.ts              # Browser client
+│   │   └── server.ts              # Server client
 │   ├── auth.ts                    # Better Auth configuration
-│   └── permissions.ts             # Role-based access control
+│   ├── auth-client.ts             # Client-side auth
+│   ├── auth-types.ts              # Auth type definitions
+│   ├── permissions.ts             # Role-based access control
+│   └── utils.ts                   # Utility functions (cn, etc.)
 ├── trigger/
 │   └── process-document.ts        # Background job for AI processing
-└── types/
-    ├── index.ts                   # Custom TypeScript types
-    └── supabase.ts                # Generated Supabase types
+├── types/
+│   ├── index.ts                   # Custom TypeScript types
+│   └── supabase.ts                # Generated Supabase types
+├── supabase/
+│   └── migrations/                # Database migrations
+├── vitest.config.mts              # Vitest configuration
+├── vitest.setup.ts                # Test setup file
+├── eslint.config.mjs              # ESLint configuration
+└── trigger.config.ts              # Trigger.dev configuration
 ```
 
 ## How It Works
