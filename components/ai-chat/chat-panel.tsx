@@ -1,8 +1,7 @@
 'use client';
 
+import { useChat } from '@ai-sdk/react';
 import { Bot, Copy, RefreshCw, Sparkles } from 'lucide-react';
-import { nanoid } from 'nanoid';
-import { useState } from 'react';
 import {
   Conversation,
   ConversationContent,
@@ -27,16 +26,11 @@ import {
 } from '@/components/ai-elements/prompt-input';
 import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import type { DocumentAssistantUIMessage } from '@/lib/agents/document-assistant';
 
 interface ChatPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
 }
 
 const suggestions = [
@@ -45,46 +39,33 @@ const suggestions = [
   'Bank statements over $1000',
 ];
 
+// Helper to extract text content from message parts
+function getMessageText(parts: DocumentAssistantUIMessage['parts']): string {
+  return parts
+    .filter((part): part is Extract<typeof part, { type: 'text' }> => part.type === 'text')
+    .map((part) => part.text)
+    .join('');
+}
+
 export function ChatPanel({ open, onOpenChange }: ChatPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [status, setStatus] = useState<'ready' | 'submitted' | 'streaming' | 'error'>('ready');
+  const { messages, sendMessage, status, regenerate } = useChat<DocumentAssistantUIMessage>();
 
   const handleSubmit = (message: PromptInputMessage) => {
     const text = message.text?.trim();
     if (!text) return;
 
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: nanoid(),
-      role: 'user',
-      content: text,
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setStatus('submitted');
-
-    // Simulate AI response (will be replaced with useChat)
-    setTimeout(() => {
-      setStatus('streaming');
-    }, 200);
-
-    setTimeout(() => {
-      const assistantMessage: ChatMessage = {
-        id: nanoid(),
-        role: 'assistant',
-        content: `Welcome to the DocuFinance AI Assistant! How can I assist you today?`,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setStatus('ready');
-    }, 1500);
+    sendMessage({ text });
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    handleSubmit({ text: suggestion, files: [] });
+    sendMessage({ text: suggestion });
   };
 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
   };
+
+  const isLoading = status === 'submitted' || status === 'streaming';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -113,29 +94,32 @@ export function ChatPanel({ open, onOpenChange }: ChatPanelProps) {
                 icon={<Bot className="h-8 w-8" />}
               />
             ) : (
-              messages.map((message) => (
-                <Message key={message.id} from={message.role}>
-                  <MessageContent>
-                    {message.role === 'assistant' ? (
-                      <MessageResponse>{message.content}</MessageResponse>
-                    ) : (
-                      message.content
+              messages.map((message) => {
+                const content = getMessageText(message.parts);
+                return (
+                  <Message key={message.id} from={message.role}>
+                    <MessageContent>
+                      {message.role === 'assistant' ? (
+                        <MessageResponse>{content}</MessageResponse>
+                      ) : (
+                        content
+                      )}
+                    </MessageContent>
+                    {message.role === 'assistant' && (
+                      <MessageActions>
+                        <MessageAction tooltip="Copy" onClick={() => handleCopy(content)}>
+                          <Copy className="h-3 w-3" />
+                        </MessageAction>
+                        <MessageAction tooltip="Retry" onClick={() => regenerate()}>
+                          <RefreshCw className="h-3 w-3" />
+                        </MessageAction>
+                      </MessageActions>
                     )}
-                  </MessageContent>
-                  {message.role === 'assistant' && (
-                    <MessageActions>
-                      <MessageAction tooltip="Copy" onClick={() => handleCopy(message.content)}>
-                        <Copy className="h-3 w-3" />
-                      </MessageAction>
-                      <MessageAction tooltip="Retry" onClick={() => {}}>
-                        <RefreshCw className="h-3 w-3" />
-                      </MessageAction>
-                    </MessageActions>
-                  )}
-                </Message>
-              ))
+                  </Message>
+                );
+              })
             )}
-            {(status === 'submitted' || status === 'streaming') && <Loader />}
+            {isLoading && <Loader />}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
