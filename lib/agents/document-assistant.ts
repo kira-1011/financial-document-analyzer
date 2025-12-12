@@ -37,4 +37,6 @@ export async function createDocumentAssistant() {
 }
 
 // Export inferred UIMessage type for type safety
-export type DocumentAssistantUIMessage = InferAgentUIMessage<ReturnType<typeof createDocumentAssistant>>;
+export type DocumentAssistantUIMessage = InferAgentUIMessage<
+  ReturnType<typeof createDocumentAssistant>
+>;

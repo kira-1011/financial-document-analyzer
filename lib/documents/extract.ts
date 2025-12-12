@@ -65,8 +65,11 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'Analyze this document and determine if it is a financial document. If it is, classify its type:' },
-            documentPart
+            {
+              type: 'text',
+              text: 'Analyze this document and determine if it is a financial document. If it is, classify its type:',
+            },
+            documentPart,
           ],
         },
       ],

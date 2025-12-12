@@ -1,9 +1,8 @@
 import { google } from '@ai-sdk/google';
-import { generateObject } from 'ai';
-import { tool } from 'ai';
+import { generateObject, tool } from 'ai';
 import { z } from 'zod';
-import { supabase } from '@/lib/supabase/server';
 import { bankStatementSchema, invoiceSchema, receiptSchema } from '@/lib/documents/schemas';
+import { supabase } from '@/lib/supabase/server';
 
 // ============================================
 // Generate Schema Context from Zod Schemas
