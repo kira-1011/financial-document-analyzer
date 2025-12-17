@@ -45,3 +45,9 @@ next-env.d.ts
 # supabase temp
 /supabase/.temp
 .trigger
+
+/lib/generated/prisma
+
+/prisma/generated/prisma
+
+/prisma/generated/prisma

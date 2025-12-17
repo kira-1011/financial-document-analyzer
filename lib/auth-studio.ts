@@ -1,7 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { organization } from 'better-auth/plugins';
-import { sendInvitationEmail } from '@/lib/email/send-email';
 import { ac, admin, member, owner } from '@/lib/permissions';
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from '@/lib/prisma'
@@ -25,18 +24,6 @@ export const auth = betterAuth({
         owner,
         admin,
         member,
-      },
-      sendInvitationEmail: async (data) => {
-        const inviteLink = `${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}`;
-
-        await sendInvitationEmail({
-          email: data.email,
-          inviterName: data.inviter.user.name,
-          inviterEmail: data.inviter.user.email,
-          organizationName: data.organization.name,
-          organizationLogo: data.organization.logo || undefined,
-          inviteLink,
-        });
       },
     }),
     nextCookies(),
@@ -70,7 +57,7 @@ export const auth = betterAuth({
         before: async (session) => {
           // Query the user's organization membership
           try {
-            const result = await prisma.member.findFirst({
+                const result = await prisma.member.findFirst({
               where: {
                 userId: session.userId,
               },
