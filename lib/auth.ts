@@ -1,16 +1,15 @@
 import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
 import { organization } from 'better-auth/plugins';
-import { Pool } from 'pg';
 import { sendInvitationEmail } from '@/lib/email/send-email';
 import { ac, admin, member, owner } from '@/lib/permissions';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+import prisma from '@/lib/prisma';
 
 export const auth = betterAuth({
-  database: pool,
+  database: prismaAdapter(prisma, {
+    provider: 'postgresql',
+  }),
   emailAndPassword: {
     enabled: true,
   },
@@ -71,12 +70,16 @@ export const auth = betterAuth({
         before: async (session) => {
           // Query the user's organization membership
           try {
-            const result = await pool.query(
-              `SELECT "organizationId" FROM member WHERE "userId" = $1 LIMIT 1`,
-              [session.userId]
-            );
+            const result = await prisma.member.findFirst({
+              where: {
+                userId: session.userId,
+              },
+              select: {
+                organizationId: true,
+              },
+            });
 
-            const organizationId = result.rows[0]?.organizationId || null;
+            const organizationId = result?.organizationId || null;
 
             return {
               data: {
