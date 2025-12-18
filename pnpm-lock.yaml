@@ -211,8 +211,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.2.7(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.2))
       better-auth-studio:
-        specifier: 1.0.67-beta.1
-        version: 1.0.67-beta.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(@types/react@19.2.7)(kysely@0.28.8)(mysql2@3.15.3)(next@16.0.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(pg@8.16.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 1.0.75-beta.1
+        version: 1.0.75-beta.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(@types/react@19.2.7)(kysely@0.28.8)(mysql2@3.15.3)(next@16.0.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(pg@8.16.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -2607,8 +2607,8 @@ packages:
     resolution: {integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==}
     engines: {node: '>= 18'}
 
-  better-auth-studio@1.0.67-beta.1:
-    resolution: {integrity: sha512-ORrmWTr4K6oMLl050vGsYSJsMiyLPR+6jRKx/t6D8uYhhj4qOip3zDgkaXLVS7f1L/snLkvN9p3Isdis59hdBA==}
+  better-auth-studio@1.0.75-beta.1:
+    resolution: {integrity: sha512-HHmMLctdI1xEirU1oXoJtn1EH0rU7dg4J1bq3eAdehStdDr66VxP3t97LhldaVCxUC2x2JG+n8YKPxDC50qlyg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -7466,7 +7466,7 @@ snapshots:
 
   '@types/chokidar@2.1.7':
     dependencies:
-      chokidar: 4.0.3
+      chokidar: 5.0.0
 
   '@types/cookie@0.4.1': {}
 
@@ -7792,7 +7792,7 @@ snapshots:
       node-addon-api: 8.5.0
       node-gyp-build: 4.8.4
 
-  better-auth-studio@1.0.67-beta.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(@types/react@19.2.7)(kysely@0.28.8)(mysql2@3.15.3)(next@16.0.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(pg@8.16.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  better-auth-studio@1.0.75-beta.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(@types/react@19.2.7)(kysely@0.28.8)(mysql2@3.15.3)(next@16.0.7(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(pg@8.16.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       '@babel/preset-react': 7.28.5(@babel/core@7.28.5)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
