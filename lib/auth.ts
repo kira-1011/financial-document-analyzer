@@ -8,9 +8,13 @@ import { ac, admin, member, owner } from '@/lib/permissions';
 import prisma from '@/lib/prisma';
 
 // Validate required Google Auth environment variables
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+const missingVars: string[] = [];
+if (!process.env.GOOGLE_CLIENT_ID) missingVars.push('GOOGLE_CLIENT_ID');
+if (!process.env.GOOGLE_CLIENT_SECRET) missingVars.push('GOOGLE_CLIENT_SECRET');
+
+if (missingVars.length > 0) {
   throw new Error(
-    'Missing required Google Auth environment variables: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set'
+    `Missing required Google Auth environment variable(s): ${missingVars.join(', ')}`
   );
 }
 
@@ -25,8 +29,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       prompt: 'select_account',
     },
   },
