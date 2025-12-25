@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useActionState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { loginAction } from '@/app/(auth)/actions';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -80,13 +81,22 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'form'>)
               'Sign in'
             )}
           </Button>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
-              Sign up
-            </Link>
-          </FieldDescription>
         </Field>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+        <GoogleSignInButton callbackURL={callbackUrl || '/'} />
+        <FieldDescription className="text-center">
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
+            Sign up
+          </Link>
+        </FieldDescription>
       </FieldGroup>
     </form>
   );
