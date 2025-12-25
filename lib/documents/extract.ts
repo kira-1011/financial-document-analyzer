@@ -1,8 +1,13 @@
 import { google } from '@ai-sdk/google';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { EXTRACTION_PROMPTS, ROUTER_SYSTEM_PROMPT } from './prompts';
-import { bankStatementSchema, invoiceSchema, receiptSchema } from './schemas';
+import {
+  bankStatementSchema,
+  invoiceSchema,
+  receiptSchema,
+  type ExtractedData,
+} from './schemas';
 
 const DEFAULT_AI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -20,6 +25,15 @@ const routerSchema = z.object({
 });
 
 export type RouterResult = z.infer<typeof routerSchema>;
+
+// ============================================
+// Extraction Result Type
+// ============================================
+export type ExtractDocumentResult = {
+  classification: RouterResult;
+  extractedData: ExtractedData | null;
+  aiModel: string;
+};
 
 // ============================================
 // Extraction Schemas (Routing Lookup)
@@ -50,16 +64,19 @@ function createDocumentPart(fileUrl: string, mimeType: string) {
 // ============================================
 // Main Extraction Function (Router + Extract)
 // ============================================
-export async function extractDocument(fileUrl: string, mimeType: string) {
+export async function extractDocument(
+  fileUrl: string,
+  mimeType: string
+): Promise<ExtractDocumentResult> {
   const documentPart = createDocumentPart(fileUrl, mimeType);
   const aiModel = process.env.AI_MODEL || DEFAULT_AI_MODEL;
   const model = google(aiModel);
 
   try {
     // Step 1: Classify the document
-    const { object: classification } = await generateObject({
+    const { output: classification } = await generateText({
       model,
-      schema: routerSchema,
+      output: Output.object({ schema: routerSchema }),
       system: ROUTER_SYSTEM_PROMPT,
       messages: [
         {
@@ -85,9 +102,9 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
     }
 
     // Step 3: Route to appropriate extractor based on classification
-    const { object: extractedData } = await generateObject({
+    const { output: extractedData } = await generateText({
       model,
-      schema: EXTRACTION_SCHEMAS[classification.documentType],
+      output: Output.object({ schema: EXTRACTION_SCHEMAS[classification.documentType] as z.ZodSchema }),
       system: EXTRACTION_PROMPTS[classification.documentType],
       messages: [
         {
@@ -102,7 +119,7 @@ export async function extractDocument(fileUrl: string, mimeType: string) {
 
     return {
       classification,
-      extractedData,
+      extractedData: extractedData as ExtractedData,
       aiModel,
     };
   } catch (error) {

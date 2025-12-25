@@ -1,4 +1,4 @@
-import { validateUIMessages } from 'ai';
+import { createAgentUIStreamResponse } from 'ai';
 import { createDocumentAssistant } from '@/lib/agents/document-assistant';
 
 export async function POST(request: Request) {
@@ -7,9 +7,10 @@ export async function POST(request: Request) {
 
     const agent = await createDocumentAssistant();
 
-    // Use respond() for UI message handling
-    return agent.respond({
-      messages: await validateUIMessages({ messages }),
+    // Use createAgentUIStreamResponse for UI message handling (AI SDK 6.0)
+    return createAgentUIStreamResponse({
+      agent,
+      uiMessages: messages,
     });
   } catch (error) {
     console.error('[/api/chat] Error:', error);
