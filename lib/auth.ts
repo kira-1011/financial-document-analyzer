@@ -8,7 +8,7 @@ import { ac, admin, member, owner } from '@/lib/permissions';
 import prisma from '@/lib/prisma';
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   trustedOrigins: [process.env.BETTER_AUTH_URL || 'http://localhost:3000'],
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
