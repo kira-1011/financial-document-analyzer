@@ -209,7 +209,11 @@ export async function deleteAccountAction(
       headers: await headers(),
     });
 
-    if (!session || session.user.email !== validatedFields.data.email) {
+    if (
+      !session ||
+      !session.user.email ||
+      session.user.email.toLowerCase() !== validatedFields.data.email.toLowerCase()
+    ) {
       return {
         message: 'Email does not match your account email.',
       };
