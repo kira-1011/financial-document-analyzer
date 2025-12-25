@@ -1,9 +1,11 @@
-import type { GenerateObjectResult } from 'ai';
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
 // Mock the 'ai' module
 vi.mock('ai', () => ({
-  generateObject: vi.fn(),
+  generateText: vi.fn(),
+  Output: {
+    object: vi.fn((config) => config),
+  },
 }));
 
 // Mock the '@ai-sdk/google' module
@@ -11,16 +13,16 @@ vi.mock('@ai-sdk/google', () => ({
   google: vi.fn(() => 'mocked-model'),
 }));
 
-import { generateObject } from 'ai';
+import { generateText } from 'ai';
 import { extractDocument, type RouterResult } from '@/lib/documents/extract';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
 
-// Helper to create properly typed mock responses
-function createMockResponse<T>(object: T): Partial<GenerateObjectResult<T>> {
-  return { object };
+// Helper to create properly typed mock responses for generateText with Output.object()
+function createMockResponse<T>(output: T): { output: T } {
+  return { output };
 }
 
-const mockGenerateObject = generateObject as Mock;
+const mockGenerateText = generateText as Mock;
 
 describe('extractDocument', () => {
   beforeEach(() => {
@@ -45,7 +47,7 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
@@ -55,7 +57,7 @@ describe('extractDocument', () => {
       expect(result.classification.confidence).toBe(0.95);
       expect(result.extractedData).not.toBeNull();
       expect((result.extractedData as InvoiceData).invoice_number).toBe('INV-001');
-      expect(mockGenerateObject).toHaveBeenCalledTimes(2);
+      expect(mockGenerateText).toHaveBeenCalledTimes(2);
     });
 
     it('classifies and extracts a receipt successfully', async () => {
@@ -74,7 +76,7 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
@@ -101,7 +103,7 @@ describe('extractDocument', () => {
         transactions: [],
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
@@ -120,19 +122,19 @@ describe('extractDocument', () => {
         confidence: 0.3,
       };
 
-      mockGenerateObject.mockResolvedValueOnce(createMockResponse(classificationResponse));
+      mockGenerateText.mockResolvedValueOnce(createMockResponse(classificationResponse));
 
       const result = await extractDocument('https://example.com/random.pdf', 'application/pdf');
 
       expect(result.classification.documentType).toBe('unknown');
       expect(result.extractedData).toBeNull();
-      expect(mockGenerateObject).toHaveBeenCalledTimes(1);
+      expect(mockGenerateText).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('error handling', () => {
     it('throws error when AI classification fails', async () => {
-      mockGenerateObject.mockRejectedValueOnce(new Error('API rate limit exceeded'));
+      mockGenerateText.mockRejectedValueOnce(new Error('API rate limit exceeded'));
 
       await expect(
         extractDocument('https://example.com/doc.pdf', 'application/pdf')
@@ -146,7 +148,7 @@ describe('extractDocument', () => {
         confidence: 0.9,
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockRejectedValueOnce(new Error('Failed to extract data'));
 
@@ -174,13 +176,13 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
       await extractDocument('https://example.com/doc.pdf', 'application/pdf');
 
-      expect(mockGenerateObject).toHaveBeenCalled();
+      expect(mockGenerateText).toHaveBeenCalled();
     });
 
     it('handles JPEG images', async () => {
@@ -199,13 +201,13 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
       await extractDocument('https://example.com/receipt.jpg', 'image/jpeg');
 
-      expect(mockGenerateObject).toHaveBeenCalled();
+      expect(mockGenerateText).toHaveBeenCalled();
     });
 
     it('handles PNG images', async () => {
@@ -224,13 +226,13 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 
       await extractDocument('https://example.com/receipt.png', 'image/png');
 
-      expect(mockGenerateObject).toHaveBeenCalled();
+      expect(mockGenerateText).toHaveBeenCalled();
     });
   });
 
@@ -252,7 +254,7 @@ describe('extractDocument', () => {
         currency: 'USD',
       };
 
-      mockGenerateObject
+      mockGenerateText
         .mockResolvedValueOnce(createMockResponse(classificationResponse))
         .mockResolvedValueOnce(createMockResponse(extractionResponse));
 

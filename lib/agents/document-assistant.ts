@@ -1,9 +1,5 @@
 import { google } from '@ai-sdk/google';
-import {
-  Experimental_Agent as Agent,
-  type Experimental_InferAgentUIMessage as InferAgentUIMessage,
-  stepCountIs,
-} from 'ai';
+import { type InferAgentUIMessage, stepCountIs, ToolLoopAgent } from 'ai';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { createSearchDocumentsTool } from './tools/search-documents';
@@ -26,9 +22,9 @@ export async function createDocumentAssistant() {
 
   const organizationId = session.session.activeOrganizationId;
 
-  return new Agent({
+  return new ToolLoopAgent({
     model: google(process.env.AI_MODEL || 'gemini-2.5-flash'),
-    system: SYSTEM_PROMPT,
+    instructions: SYSTEM_PROMPT,
     tools: {
       searchDocuments: createSearchDocumentsTool(organizationId),
     },

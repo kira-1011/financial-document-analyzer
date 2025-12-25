@@ -1,5 +1,5 @@
 import { google } from '@ai-sdk/google';
-import { generateObject, tool } from 'ai';
+import { generateText, Output, tool } from 'ai';
 import { z } from 'zod';
 import { bankStatementSchema, invoiceSchema, receiptSchema } from '@/lib/documents/schemas';
 import { supabase } from '@/lib/supabase/server';
@@ -85,9 +85,9 @@ export async function textToSql(
   sql: string;
   explanation: string;
 }> {
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: google(process.env.AI_MODEL || 'gemini-2.5-flash'),
-    schema: sqlQueryResultSchema,
+    output: Output.object({ schema: sqlQueryResultSchema }),
     system: generateSchemaContext({ organizationId }),
     prompt: `Generate a PostgreSQL SELECT query for this user request:
 
@@ -100,7 +100,11 @@ Remember:
 - Be precise with the query based on the user's intent`,
   });
 
-  return object;
+  if (!output) {
+    throw new Error('Failed to generate SQL query');
+  }
+
+  return output;
 }
 
 // ============================================

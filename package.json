@@ -2,7 +2,7 @@
   "name": "financial-document-analyzer",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@10.26.2",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -18,8 +18,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.26",
-    "@ai-sdk/react": "^2.0.86",
+    "@ai-sdk/google": "^3.0.1",
+    "@ai-sdk/react": "^3.0.3",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.1.0",
@@ -44,7 +44,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@trigger.dev/sdk": "4.2.0",
     "@xyflow/react": "^12.10.0",
-    "ai": "^5.0.86",
+    "ai": "^6.0.3",
     "bcrypt": "^6.0.0",
     "better-auth": "^1.4.5",
     "class-variance-authority": "^0.7.1",
@@ -87,7 +87,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
-    "better-auth-studio": "1.0.75-beta.1",
+    "better-auth-studio": "1.0.79-beta.1",
     "dotenv": "^17.2.3",
     "husky": "^9.1.7",
     "jsdom": "^27.3.0",
