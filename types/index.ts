@@ -41,11 +41,21 @@ export type PasswordState = {
   };
 };
 
+export type SetPasswordState = {
+  success?: boolean;
+  message?: string;
+  errors?: {
+    newPassword?: string[];
+    confirmPassword?: string[];
+  };
+};
+
 export type DeleteAccountState = {
   success?: boolean;
   message?: string;
   errors?: {
     password?: string[];
+    email?: string[];
   };
 };
 
@@ -78,6 +88,7 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export interface ProfileFormProps {
   user: User;
+  hasPassword: boolean;
 }
 
 export interface OrganizationFormProps {

@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import {
   changePasswordAction,
   deleteAccountAction,
+  setPasswordAction,
   updateProfileAction,
 } from '@/app/(dashboard)/settings/profile/actions';
 import {
@@ -25,9 +26,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { DeleteAccountState, PasswordState, ProfileFormProps, ProfileState } from '@/types';
+import type {
+  DeleteAccountState,
+  PasswordState,
+  ProfileFormProps,
+  ProfileState,
+  SetPasswordState,
+} from '@/types';
 
-export function ProfileForm({ user }: ProfileFormProps) {
+export function ProfileForm({ user, hasPassword }: ProfileFormProps) {
   const router = useRouter();
 
   // Profile form state
@@ -36,11 +43,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
     {}
   );
 
-  // Password form state
+  // Password form state (for users with password)
   const [passwordState, passwordAction, isPasswordPending] = useActionState<
     PasswordState,
     FormData
   >(changePasswordAction, {});
+
+  // Set password form state (for OAuth users without password)
+  const [setPasswordState, setPasswordFormAction, isSetPasswordPending] = useActionState<
+    SetPasswordState,
+    FormData
+  >(setPasswordAction, {});
 
   // Delete account state
   const [deleteState, deleteAction, isDeletePending] = useActionState<DeleteAccountState, FormData>(
@@ -63,12 +76,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
   useEffect(() => {
     if (passwordState.success) {
       toast.success(passwordState.message);
-      // Reset password form by refreshing
       router.refresh();
     } else if (passwordState.message && !passwordState.success) {
       toast.error(passwordState.message);
     }
   }, [passwordState, router]);
+
+  useEffect(() => {
+    if (setPasswordState.success) {
+      toast.success(setPasswordState.message);
+      router.refresh();
+    } else if (setPasswordState.message && !setPasswordState.success) {
+      toast.error(setPasswordState.message);
+    }
+  }, [setPasswordState, router]);
 
   useEffect(() => {
     if (deleteState.message) {
@@ -130,47 +151,81 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </CardContent>
       </Card>
 
-      {/* Change Password */}
+      {/* Password Section - Different UI based on hasPassword */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5" />
-            Change Password
+            {hasPassword ? 'Change Password' : 'Set Password'}
           </CardTitle>
-          <CardDescription>Update your password to keep your account secure</CardDescription>
+          <CardDescription>
+            {hasPassword
+              ? 'Update your password to keep your account secure'
+              : 'Add a password to sign in with email and password'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={passwordAction} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input id="currentPassword" name="currentPassword" type="password" />
-              {passwordState.errors?.currentPassword && (
-                <p className="text-sm text-destructive">
-                  {passwordState.errors.currentPassword[0]}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input id="newPassword" name="newPassword" type="password" />
-              {passwordState.errors?.newPassword && (
-                <p className="text-sm text-destructive">{passwordState.errors.newPassword[0]}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input id="confirmPassword" name="confirmPassword" type="password" />
-              {passwordState.errors?.confirmPassword && (
-                <p className="text-sm text-destructive">
-                  {passwordState.errors.confirmPassword[0]}
-                </p>
-              )}
-            </div>
-            <Button type="submit" disabled={isPasswordPending}>
-              {isPasswordPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Change Password
-            </Button>
-          </form>
+          {hasPassword ? (
+            <form action={passwordAction} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <Input id="currentPassword" name="currentPassword" type="password" />
+                {passwordState.errors?.currentPassword && (
+                  <p className="text-sm text-destructive">
+                    {passwordState.errors.currentPassword[0]}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input id="newPassword" name="newPassword" type="password" />
+                {passwordState.errors?.newPassword && (
+                  <p className="text-sm text-destructive">{passwordState.errors.newPassword[0]}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input id="confirmPassword" name="confirmPassword" type="password" />
+                {passwordState.errors?.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {passwordState.errors.confirmPassword[0]}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" disabled={isPasswordPending}>
+                {isPasswordPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Change Password
+              </Button>
+            </form>
+          ) : (
+            <form action={setPasswordFormAction} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You signed in with Google. Set a password to also sign in with your email.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input id="newPassword" name="newPassword" type="password" />
+                {setPasswordState.errors?.newPassword && (
+                  <p className="text-sm text-destructive">
+                    {setPasswordState.errors.newPassword[0]}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input id="confirmPassword" name="confirmPassword" type="password" />
+                {setPasswordState.errors?.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {setPasswordState.errors.confirmPassword[0]}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" disabled={isSetPasswordPending}>
+                {isSetPasswordPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Set Password
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
 
@@ -205,19 +260,37 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <form action={deleteAction}>
+                <input type="hidden" name="hasPassword" value={hasPassword.toString()} />
                 <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="delete-password">Enter your password to confirm</Label>
-                    <Input
-                      id="delete-password"
-                      name="password"
-                      type="password"
-                      placeholder="Your password"
-                    />
-                    {deleteState.errors?.password && (
-                      <p className="text-sm text-destructive">{deleteState.errors.password[0]}</p>
-                    )}
-                  </div>
+                  {hasPassword ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="delete-password">Enter your password to confirm</Label>
+                      <Input
+                        id="delete-password"
+                        name="password"
+                        type="password"
+                        placeholder="Your password"
+                      />
+                      {deleteState.errors?.password && (
+                        <p className="text-sm text-destructive">{deleteState.errors.password[0]}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="delete-email">
+                        Enter your email <span className="font-mono text-muted-foreground">({user.email})</span> to confirm
+                      </Label>
+                      <Input
+                        id="delete-email"
+                        name="email"
+                        type="email"
+                        placeholder={user.email}
+                      />
+                      {deleteState.errors?.email && (
+                        <p className="text-sm text-destructive">{deleteState.errors.email[0]}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel type="button" disabled={isDeletePending}>

@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { APIError } from 'better-auth/api';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
 import { organization } from 'better-auth/plugins';
@@ -7,11 +8,20 @@ import { ac, admin, member, owner } from '@/lib/permissions';
 import prisma from '@/lib/prisma';
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: [process.env.BETTER_AUTH_URL || 'http://localhost:3000'],
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      prompt: "select_account",
+    },
   },
   user: {
     deleteUser: {
@@ -37,6 +47,22 @@ export const auth = betterAuth({
           organizationLogo: data.organization.logo || undefined,
           inviteLink,
         });
+      },
+      organizationHooks: {
+        beforeDeleteOrganization: async (data) => {
+          // Count how many organizations the user belongs to
+          const memberCount = await prisma.member.count({
+            where: {
+              userId: data.user.id,
+            },
+          });
+
+          if (memberCount <= 1) {
+            throw new APIError('BAD_REQUEST', {
+              message: 'Cannot delete your only organization. You must have at least one organization.',
+            });
+          }
+        },
       },
     }),
     nextCookies(),
