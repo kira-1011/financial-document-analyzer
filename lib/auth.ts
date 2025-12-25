@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth';
-import { APIError } from 'better-auth/api';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { APIError } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
 import { organization } from 'better-auth/plugins';
 import { sendInvitationEmail } from '@/lib/email/send-email';
@@ -20,7 +20,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      prompt: "select_account",
+      prompt: 'select_account',
     },
   },
   user: {
@@ -59,7 +59,8 @@ export const auth = betterAuth({
 
           if (memberCount <= 1) {
             throw new APIError('BAD_REQUEST', {
-              message: 'Cannot delete your only organization. You must have at least one organization.',
+              message:
+                'Cannot delete your only organization. You must have at least one organization.',
             });
           }
         },

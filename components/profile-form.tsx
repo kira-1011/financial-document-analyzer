@@ -278,14 +278,11 @@ export function ProfileForm({ user, hasPassword }: ProfileFormProps) {
                   ) : (
                     <div className="space-y-2">
                       <Label htmlFor="delete-email">
-                        Enter your email <span className="font-mono text-muted-foreground">({user.email})</span> to confirm
+                        Enter your email{' '}
+                        <span className="font-mono text-muted-foreground">({user.email})</span> to
+                        confirm
                       </Label>
-                      <Input
-                        id="delete-email"
-                        name="email"
-                        type="email"
-                        placeholder={user.email}
-                      />
+                      <Input id="delete-email" name="email" type="email" placeholder={user.email} />
                       {deleteState.errors?.email && (
                         <p className="text-sm text-destructive">{deleteState.errors.email[0]}</p>
                       )}

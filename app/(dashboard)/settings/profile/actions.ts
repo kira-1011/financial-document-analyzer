@@ -153,10 +153,7 @@ export async function setPasswordAction(
   } catch (error) {
     console.error('[setPasswordAction] Error setting password:', error);
     return {
-      message:
-        error instanceof APIError
-          ? error.message
-          : 'Failed to set password.',
+      message: error instanceof APIError ? error.message : 'Failed to set password.',
     };
   }
 }
@@ -228,10 +225,7 @@ export async function deleteAccountAction(
     } catch (error) {
       console.error('[deleteAccountAction] Error deleting account:', error);
       return {
-        message:
-          error instanceof APIError
-            ? error.message
-            : 'Failed to delete account.',
+        message: error instanceof APIError ? error.message : 'Failed to delete account.',
       };
     }
   }

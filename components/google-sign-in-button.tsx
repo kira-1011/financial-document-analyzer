@@ -1,8 +1,8 @@
 'use client';
 
 import { toast } from 'sonner';
-import { signIn } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
+import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 
 function GoogleIcon({ className }: { className?: string }) {
