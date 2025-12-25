@@ -1,9 +1,5 @@
 import { google } from '@ai-sdk/google';
-import {
-  ToolLoopAgent,
-  type InferAgentUIMessage,
-  stepCountIs,
-} from 'ai';
+import { type InferAgentUIMessage, stepCountIs, ToolLoopAgent } from 'ai';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { createSearchDocumentsTool } from './tools/search-documents';

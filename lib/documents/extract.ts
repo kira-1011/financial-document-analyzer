@@ -2,12 +2,7 @@ import { google } from '@ai-sdk/google';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { EXTRACTION_PROMPTS, ROUTER_SYSTEM_PROMPT } from './prompts';
-import {
-  bankStatementSchema,
-  invoiceSchema,
-  receiptSchema,
-  type ExtractedData,
-} from './schemas';
+import { bankStatementSchema, type ExtractedData, invoiceSchema, receiptSchema } from './schemas';
 
 const DEFAULT_AI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -104,7 +99,9 @@ export async function extractDocument(
     // Step 3: Route to appropriate extractor based on classification
     const { output: extractedData } = await generateText({
       model,
-      output: Output.object({ schema: EXTRACTION_SCHEMAS[classification.documentType] as z.ZodSchema }),
+      output: Output.object({
+        schema: EXTRACTION_SCHEMAS[classification.documentType] as z.ZodSchema,
+      }),
       system: EXTRACTION_PROMPTS[classification.documentType],
       messages: [
         {
