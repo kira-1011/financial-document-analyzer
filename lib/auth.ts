@@ -7,6 +7,14 @@ import { sendInvitationEmail } from '@/lib/email/send-email';
 import { ac, admin, member, owner } from '@/lib/permissions';
 import prisma from '@/lib/prisma';
 
+// Validate required environment variables
+if (!process.env.GOOGLE_CLIENT_ID) {
+  throw new Error('Missing required environment variable: GOOGLE_CLIENT_ID');
+}
+if (!process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error('Missing required environment variable: GOOGLE_CLIENT_SECRET');
+}
+
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   trustedOrigins: [process.env.BETTER_AUTH_URL || 'http://localhost:3000'],
@@ -18,8 +26,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       prompt: 'select_account',
     },
   },
