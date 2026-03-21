@@ -1,13 +1,13 @@
 import { task } from '@trigger.dev/sdk/v3';
 import { fetchDocument, getSignedUrlForFile, updateDocument } from '@/lib/documents/api';
 import { extractDocument } from '@/lib/documents/extract';
-import { getOrInitProvider, forceFlushTelemetry } from '@/lib/telemetry';
+import { forceFlushTelemetry, initLangfuseForTask } from '@/lib/telemetry';
 
 export const processDocument = task({
   id: 'process-document',
   run: async (payload: { documentId: string }, { ctx }) => {
     const runId = ctx.run.id;
-    await getOrInitProvider();
+    await initLangfuseForTask();
 
     console.log('processDocument runId', runId);
 

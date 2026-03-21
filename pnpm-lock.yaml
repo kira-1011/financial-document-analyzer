@@ -20,6 +20,9 @@ importers:
       '@langfuse/otel':
         specifier: ^5.0.1
         version: 5.0.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.6.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.6.0(@opentelemetry/api@1.9.0))
+      '@langfuse/tracing':
+        specifier: ^5.0.1
+        version: 5.0.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -1000,6 +1003,12 @@ packages:
       '@opentelemetry/core': ^2.0.1
       '@opentelemetry/exporter-trace-otlp-http': '>=0.202.0 <1.0.0'
       '@opentelemetry/sdk-trace-base': ^2.0.1
+
+  '@langfuse/tracing@5.0.1':
+    resolution: {integrity: sha512-1LyOj6ct1piIivqMKMPcMFFWksH6MaUjA/0hY1N5IAquSnx6GQuN7Hhj/XqqZWBMWszcd2vcTRb9i6MIdDY49g==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
 
   '@mermaid-js/parser@0.6.3':
     resolution: {integrity: sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA==}
@@ -6001,6 +6010,11 @@ snapshots:
       '@opentelemetry/core': 2.6.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-http': 0.203.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.6.0(@opentelemetry/api@1.9.0)
+
+  '@langfuse/tracing@5.0.1(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@langfuse/core': 5.0.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/api': 1.9.0
 
   '@mermaid-js/parser@0.6.3':
     dependencies:

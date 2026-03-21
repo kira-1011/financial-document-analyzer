@@ -1,65 +1,63 @@
-import type { AttributeValue } from '@opentelemetry/api';
+import type { AttributeValue } from "@opentelemetry/api";
 
 type TelemetryConfig = {
-  experimental_telemetry: {
-    isEnabled: true;
-    functionId: string;
-    metadata: Record<string, AttributeValue>;
-  };
+	experimental_telemetry: {
+		isEnabled: true;
+		functionId: string;
+		metadata: Record<string, AttributeValue>;
+	};
 };
 
 export function isLangfuseEnabled(): boolean {
-  return !!(process.env.LANGFUSE_SECRET_KEY && process.env.LANGFUSE_PUBLIC_KEY);
+	return !!(
+		process.env.LANGFUSE_SECRET_KEY && process.env.LANGFUSE_PUBLIC_KEY
+	);
 }
 
-export function createTelemetryConfig(
-  options?: { functionId?: string; metadata?: Record<string, AttributeValue> }
-): TelemetryConfig | Record<string, never> {
-  if (!isLangfuseEnabled()) return {};
+export function createTelemetryConfig(options?: {
+	functionId?: string;
+	metadata?: Record<string, AttributeValue>;
+}): TelemetryConfig | Record<string, never> {
+	if (!isLangfuseEnabled()) return {};
 
-  return {
-    experimental_telemetry: {
-      isEnabled: true,
-      functionId: options?.functionId ?? 'unknown',
-      metadata: options?.metadata ?? {},
-    },
-  };
+	return {
+		experimental_telemetry: {
+			isEnabled: true,
+			functionId: options?.functionId ?? "unknown",
+			metadata: options?.metadata ?? {},
+		},
+	};
 }
 
-let initialized = false;
+// Holds a reference to the span processor for flushing.
+// Set by instrumentation.ts (Next.js) or initLangfuseForTask (Trigger.dev).
+let _spanProcessor: { forceFlush(): Promise<void> } | null = null;
 
-export async function initLangfuse() {
-  if (initialized || !isLangfuseEnabled()) return null;
-
-  try {
-    const { NodeTracerProvider } = await import('@opentelemetry/sdk-trace-node');
-    const { LangfuseSpanProcessor } = await import('@langfuse/otel');
-
-    const spanProcessor = new LangfuseSpanProcessor();
-    const tracerProvider = new NodeTracerProvider({
-      spanProcessors: [spanProcessor],
-    });
-    tracerProvider.register();
-
-    initialized = true;
-    return { tracerProvider, spanProcessor };
-  } catch (error) {
-    console.warn('[telemetry] Failed to initialize Langfuse:', error);
-    return null;
-  }
+export function setSpanProcessor(
+	processor: { forceFlush(): Promise<void> } | null,
+) {
+	_spanProcessor = processor;
 }
 
-let langfuseInstance: Awaited<ReturnType<typeof initLangfuse>> = null;
+/**
+ * Initialize Langfuse tracing for non-Next.js runtimes (e.g. Trigger.dev).
+ * In Next.js, instrumentation.ts handles this automatically.
+ */
+export async function initLangfuseForTask() {
+	if (_spanProcessor || !isLangfuseEnabled()) return;
 
-export async function getOrInitProvider() {
-  if (!langfuseInstance) {
-    langfuseInstance = await initLangfuse();
-  }
-  return langfuseInstance;
+	const { NodeTracerProvider } = await import("@opentelemetry/sdk-trace-node");
+	const { LangfuseSpanProcessor } = await import("@langfuse/otel");
+
+	const spanProcessor = new LangfuseSpanProcessor();
+	const tracerProvider = new NodeTracerProvider({
+		spanProcessors: [spanProcessor],
+	});
+	tracerProvider.register();
+
+	_spanProcessor = spanProcessor;
 }
 
 export async function forceFlushTelemetry() {
-  if (langfuseInstance?.spanProcessor) {
-    await langfuseInstance.spanProcessor.forceFlush();
-  }
+	await _spanProcessor?.forceFlush();
 }
