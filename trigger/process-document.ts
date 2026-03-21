@@ -1,11 +1,13 @@
 import { task } from '@trigger.dev/sdk/v3';
 import { fetchDocument, getSignedUrlForFile, updateDocument } from '@/lib/documents/api';
 import { extractDocument } from '@/lib/documents/extract';
+import { getOrInitProvider, forceFlushTelemetry } from '@/lib/telemetry';
 
 export const processDocument = task({
   id: 'process-document',
   run: async (payload: { documentId: string }, { ctx }) => {
     const runId = ctx.run.id;
+    await getOrInitProvider();
 
     console.log('processDocument runId', runId);
 
@@ -29,7 +31,8 @@ export const processDocument = task({
 
       const { classification, extractedData, aiModel } = await extractDocument(
         signedUrl,
-        document.mimeType || ''
+        document.mimeType || '',
+        { documentId: payload.documentId, organizationId: document.organizationId }
       );
 
       // 5. Update with results
@@ -41,6 +44,8 @@ export const processDocument = task({
         status: 'completed',
         processedAt: new Date().toISOString(),
       });
+
+      await forceFlushTelemetry();
 
       return {
         success: true,

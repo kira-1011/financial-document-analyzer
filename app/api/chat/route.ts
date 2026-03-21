@@ -1,5 +1,7 @@
 import { createAgentUIStreamResponse } from 'ai';
+import { after } from 'next/server';
 import { createDocumentAssistant } from '@/lib/agents/document-assistant';
+import { forceFlushTelemetry } from '@/lib/telemetry';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +10,10 @@ export async function POST(request: Request) {
     const agent = await createDocumentAssistant();
 
     // Use createAgentUIStreamResponse for UI message handling (AI SDK 6.0)
+    after(async () => {
+      await forceFlushTelemetry();
+    });
+
     return createAgentUIStreamResponse({
       agent,
       uiMessages: messages,
