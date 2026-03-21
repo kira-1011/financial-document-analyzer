@@ -3,6 +3,7 @@ import { generateText, Output, tool } from 'ai';
 import { z } from 'zod';
 import { bankStatementSchema, invoiceSchema, receiptSchema } from '@/lib/documents/schemas';
 import { supabase } from '@/lib/supabase/server';
+import { createTelemetryConfig } from '@/lib/telemetry';
 
 // ============================================
 // Generate Schema Context from Zod Schemas
@@ -98,6 +99,10 @@ Remember:
 - Use proper JSONB operators (->> for text, -> for objects)
 - Select: id, "fileName", "documentType", "extractedData", "createdAt"
 - Be precise with the query based on the user's intent`,
+    ...createTelemetryConfig({
+      functionId: 'text-to-sql',
+      metadata: { organizationId },
+    }),
   });
 
   if (!output) {

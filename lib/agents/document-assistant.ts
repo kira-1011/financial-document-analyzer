@@ -3,6 +3,7 @@ import { type InferAgentUIMessage, stepCountIs, ToolLoopAgent } from 'ai';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { createSearchDocumentsTool } from './tools/search-documents';
+import { createTelemetryConfig } from '@/lib/telemetry';
 
 const SYSTEM_PROMPT = `You are a helpful financial document assistant. You help users find and analyze their invoices, receipts, and bank statements.
 
@@ -29,6 +30,13 @@ export async function createDocumentAssistant() {
       searchDocuments: createSearchDocumentsTool(organizationId),
     },
     stopWhen: stepCountIs(10),
+    ...createTelemetryConfig({
+      functionId: 'document-assistant',
+      metadata: {
+        organizationId,
+        ...(session.user?.id && { userId: session.user.id }),
+      },
+    }),
   });
 }
 

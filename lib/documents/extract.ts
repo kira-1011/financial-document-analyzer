@@ -3,6 +3,7 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { EXTRACTION_PROMPTS, ROUTER_SYSTEM_PROMPT } from './prompts';
 import { bankStatementSchema, type ExtractedData, invoiceSchema, receiptSchema } from './schemas';
+import { createTelemetryConfig } from '@/lib/telemetry';
 
 const DEFAULT_AI_MODEL = 'gemini-2.5-flash-lite';
 
@@ -61,7 +62,8 @@ function createDocumentPart(fileUrl: string, mimeType: string) {
 // ============================================
 export async function extractDocument(
   fileUrl: string,
-  mimeType: string
+  mimeType: string,
+  meta?: { documentId?: string; organizationId?: string }
 ): Promise<ExtractDocumentResult> {
   const documentPart = createDocumentPart(fileUrl, mimeType);
   const aiModel = process.env.AI_MODEL || DEFAULT_AI_MODEL;
@@ -85,6 +87,14 @@ export async function extractDocument(
           ],
         },
       ],
+      ...createTelemetryConfig({
+        functionId: 'document-classify',
+        metadata: {
+          ...(meta?.documentId && { documentId: meta.documentId }),
+          mimeType,
+          ...(meta?.organizationId && { organizationId: meta.organizationId }),
+        },
+      }),
     });
 
     // Step 2: Skip extraction for unknown documents
@@ -112,6 +122,15 @@ export async function extractDocument(
           ],
         },
       ],
+      ...createTelemetryConfig({
+        functionId: `document-extract-${classification.documentType}`,
+        metadata: {
+          ...(meta?.documentId && { documentId: meta.documentId }),
+          mimeType,
+          documentType: classification.documentType,
+          ...(meta?.organizationId && { organizationId: meta.organizationId }),
+        },
+      }),
     });
 
     return {
