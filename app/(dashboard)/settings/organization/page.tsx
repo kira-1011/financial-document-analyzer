@@ -26,17 +26,19 @@ export default async function OrganizationSettingsPage() {
     );
   }
 
-  // Get pending invitations
-  const invitations = await auth.api.listInvitations({
-    query: { organizationId: activeOrg.id },
-    headers: await headers(),
-  });
-
   // Get current user's role in this organization
   const currentMember = activeOrg.members.find((m) => m.userId === session.user.id);
   const userRole: UserRole = (currentMember?.role as UserRole) || 'member';
   const canManage = userRole === 'owner' || userRole === 'admin';
   const isOwner = userRole === 'owner';
+
+  // Better Auth rejects listing invitations for roles without invitation:create
+  const invitations = canManage
+    ? await auth.api.listInvitations({
+        query: { organizationId: activeOrg.id },
+        headers: await headers(),
+      })
+    : [];
 
   return (
     <OrganizationForm
