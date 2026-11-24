@@ -1,3 +1,4 @@
+import { additionalPackages } from '@trigger.dev/build/extensions/core';
 import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export default defineConfig({
@@ -19,4 +20,9 @@ export default defineConfig({
     },
   },
   dirs: ['./trigger'],
+  build: {
+    // The AI SDK loads undici at runtime with createRequire, so the bundler
+    // never sees it and it would be missing from the deployed image.
+    extensions: [additionalPackages({ packages: ['undici@6.29.1'] })],
+  },
 });
