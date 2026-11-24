@@ -82,7 +82,7 @@ Documentation improvements are always appreciated:
 2. **Set up environment variables**:
 
    ```bash
-   cp .env.example .env.local
+   cp .env.local.example .env.local
    ```
 
    Fill in your credentials (see README for details).
@@ -90,14 +90,15 @@ Documentation improvements are always appreciated:
 3. **Set up the database**:
 
    ```bash
-   pnpm dlx supabase link
-   pnpm dlx supabase db push
+   pnpm dlx neon@latest deploy
+   pnpm db:migrate
+   pnpm db:search-role
    ```
 
-4. **Generate types**:
+4. **Generate the Prisma client**:
 
    ```bash
-   pnpm run update-supabase-types
+   pnpm exec prisma generate
    ```
 
 5. **Start the development server**:
@@ -178,7 +179,7 @@ docs(readme): add deployment instructions
 ### TypeScript Guidelines
 
 - Define types in `types/index.ts` for custom types
-- Use generated Supabase types from `types/supabase.ts`
+- Use the generated Prisma types from `prisma/generated/prisma/client`
 - Prefer `interface` for object shapes, `type` for unions/intersections
 - Avoid `any` - use `unknown` if type is truly unknown
 

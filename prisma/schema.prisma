@@ -30,7 +30,7 @@ model account {
 model documents {
   id                   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   organizationId       String
-  uploadedBy           String
+  uploadedBy           String?
   fileName             String
   filePath             String
   fileSize             Int?
@@ -46,7 +46,7 @@ model documents {
   status               document_status @default(pending)
   runId                String?
   organization         organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "documents_organization_id_fkey")
-  user                 user            @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "documents_uploadedby_fkey")
+  user                 user?           @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "documents_uploadedby_fkey")
 
   @@index([createdAt(sort: Desc)], map: "idx_documents_created")
   @@index([extractedData], map: "idx_documents_extracted_gin", type: Gin)

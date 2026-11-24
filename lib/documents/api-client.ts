@@ -1,24 +1,19 @@
-import { supabase } from '@/lib/supabase/client';
-import type { Database } from '@/types/supabase';
+'use server';
 
-type Document = Database['public']['Tables']['documents']['Row'];
-export type DocumentStatus = Pick<Document, 'id' | 'status' | 'documentType'>;
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { type DocumentStatus, fetchDocumentStatuses as fetchStatuses } from './api';
 
+export type { DocumentStatus };
+
+// Called by the document list to poll processing status. Runs on the server
+// and only answers for the caller's active organization.
 export async function fetchDocumentStatuses(organizationId: string): Promise<DocumentStatus[]> {
-  try {
-    const { data, error } = await supabase
-      .from('documents')
-      .select('id, status, documentType')
-      .eq('organizationId', organizationId);
+  const session = await auth.api.getSession({ headers: await headers() });
 
-    if (error) {
-      console.error('[fetchDocumentStatuses] Error:', error);
-      throw new Error('Failed to fetch document statuses');
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('[fetchDocumentStatuses] Error:', error);
-    throw error;
+  if (!session || session.session.activeOrganizationId !== organizationId) {
+    return [];
   }
+
+  return fetchStatuses(organizationId);
 }

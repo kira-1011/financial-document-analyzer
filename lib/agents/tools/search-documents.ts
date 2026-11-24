@@ -1,8 +1,9 @@
 import { google } from '@ai-sdk/google';
 import { generateText, Output, tool } from 'ai';
+import { Pool, type PoolClient } from 'pg';
 import { z } from 'zod';
 import { bankStatementSchema, invoiceSchema, receiptSchema } from '@/lib/documents/schemas';
-import { supabase } from '@/lib/supabase/server';
+import prisma from '@/lib/prisma';
 
 // ============================================
 // Generate Schema Context from Zod Schemas
@@ -121,30 +122,83 @@ export interface DocumentSearchResult {
 // ============================================
 // Execute Search Query
 // ============================================
-async function executeSearchQuery(sql: string): Promise<{
+const MAX_SEARCH_ROWS = 50;
+
+// Columns of the per-query temp table. Enums become text so the generated SQL
+// can compare them to plain strings.
+const TEMP_TABLE_DDL = `CREATE TEMP TABLE documents (
+  id uuid, "organizationId" text, "uploadedBy" text, "fileName" text, "filePath" text,
+  "fileSize" integer, "mimeType" text, "errorMessage" text, "extractedData" jsonb,
+  "extractionConfidence" real, "aiModel" text, "createdAt" timestamptz, "updatedAt" timestamptz,
+  "processedAt" timestamptz, "documentType" text, status text, "runId" text
+) ON COMMIT DROP`;
+
+let searchPool: Pool | null = null;
+
+function getSearchPool(): Pool {
+  if (!searchPool) {
+    const connectionString = process.env.SEARCH_DATABASE_URL;
+    if (!connectionString) {
+      throw new Error('SEARCH_DATABASE_URL is not set. Run `pnpm db:search-role`.');
+    }
+    searchPool = new Pool({ connectionString, max: 3 });
+  }
+  return searchPool;
+}
+
+// Runs model-written SQL so that it can only ever see one organization's data.
+// The organization's completed documents are loaded by Prisma (filtered in
+// code) into a temp table, in a session logged in as docufinance_search: a role
+// with no table privileges and no role memberships, so the SQL can neither
+// reach the real tables nor switch to a role that can. The transaction is
+// always rolled back, which drops the temp table.
+export async function executeSearchQuery(
+  sql: string,
+  organizationId: string
+): Promise<{
   documents: DocumentSearchResult[];
   error: string | null;
 }> {
-  try {
-    // Strip trailing semicolon if present
-    const cleanSql = sql.replace(/;\s*$/, '');
+  const cleanSql = sql.trim().replace(/;\s*$/, '');
 
-    const { data, error } = await supabase.rpc('execute_document_query', {
-      query_text: cleanSql,
+  if (!/^(select|with)\b/i.test(cleanSql) || cleanSql.includes(';')) {
+    return { documents: [], error: 'Only a single SELECT query is allowed' };
+  }
+
+  let client: PoolClient | null = null;
+  try {
+    const orgDocuments = await prisma.documents.findMany({
+      where: { organizationId, status: 'completed' },
     });
 
-    if (error) {
-      console.error('[executeSearchQuery] RPC Error:', error);
-      return { documents: [], error: error.message };
-    }
+    client = await getSearchPool().connect();
+    await client.query('BEGIN');
+    await client.query("SET LOCAL statement_timeout = '5s'");
+    await client.query(TEMP_TABLE_DDL);
+    await client.query(
+      'INSERT INTO documents SELECT * FROM json_populate_recordset(NULL::documents, $1::json)',
+      [JSON.stringify(orgDocuments)]
+    );
 
-    // Parse JSONB result - it's an array of documents
-    const documents = (data as unknown as DocumentSearchResult[]) || [];
+    // A bound parameter forces the extended query protocol, which rejects
+    // multiple statements. jsonb_agg keeps dates and numbers serializable.
+    const { rows } = await client.query<{ results: DocumentSearchResult[] }>(
+      `SELECT COALESCE(jsonb_agg(q), '[]'::jsonb) AS results FROM (SELECT * FROM (${cleanSql}) AS generated LIMIT $1) AS q`,
+      [MAX_SEARCH_ROWS]
+    );
 
-    return { documents, error: null };
+    return { documents: rows[0]?.results ?? [], error: null };
   } catch (err) {
-    console.error('[executeSearchQuery] Exception:', err);
-    return { documents: [], error: 'Failed to execute query' };
+    console.error('[executeSearchQuery] Error:', err);
+    return {
+      documents: [],
+      error: err instanceof Error ? err.message : 'Failed to execute query',
+    };
+  } finally {
+    if (client) {
+      await client.query('ROLLBACK').catch(() => {});
+      client.release();
+    }
   }
 }
 
@@ -174,8 +228,8 @@ Examples of queries you can handle:
         console.log('[searchDocuments] Generated SQL:', sql);
         console.log('[searchDocuments] Explanation:', explanation);
 
-        // Step 2: Execute the query via RPC (RPC handles validation)
-        const { documents, error } = await executeSearchQuery(sql);
+        // Step 2: Execute the query against this organization's documents only
+        const { documents, error } = await executeSearchQuery(sql, organizationId);
 
         if (error) {
           return {

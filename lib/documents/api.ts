@@ -1,56 +1,60 @@
-import { supabase } from '@/lib/supabase/server';
-import type { Database } from '@/types/supabase';
+import prisma from '@/lib/prisma';
+import { deleteObject, getSignedDownloadUrl, putObject } from '@/lib/storage';
+import { type documents, Prisma } from '@/prisma/generated/prisma/client';
 
-export type Document = Database['public']['Tables']['documents']['Row'];
+export type Document = documents;
 
-// Add new type for document with uploader info
-export type DocumentWithUploadedBy = Document & {
+export type DocumentWithUploadedBy = Omit<Document, 'uploadedBy'> & {
   uploadedBy: { name: string; email: string; id: string } | null;
+};
+
+export type CreateDocumentInput = Pick<
+  Prisma.documentsUncheckedCreateInput,
+  | 'id'
+  | 'organizationId'
+  | 'uploadedBy'
+  | 'fileName'
+  | 'filePath'
+  | 'fileSize'
+  | 'mimeType'
+  | 'status'
+>;
+
+export type UpdateDocumentInput = Omit<Prisma.documentsUncheckedUpdateInput, 'extractedData'> & {
+  extractedData?: Prisma.InputJsonValue | null;
 };
 
 export async function fetchDocuments(organizationId: string): Promise<DocumentWithUploadedBy[]> {
   try {
-    const { data, error } = await supabase
-      .from('documents')
-      .select(
-        `
-        *,
-        uploadedBy:user!uploadedBy(name, email, id)
-      `
-      )
-      .eq('organizationId', organizationId)
-      .order('createdAt', { ascending: false });
+    const rows = await prisma.documents.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    });
 
-    if (error) {
-      console.error('[fetchDocuments] Error:', error);
-      throw new Error('Failed to fetch documents');
-    }
-
-    return (data || []) as DocumentWithUploadedBy[];
+    return rows.map(({ user, ...document }) => ({ ...document, uploadedBy: user }));
   } catch (error) {
     console.error('[fetchDocuments] Error:', error);
-    throw error;
+    throw new Error('Failed to fetch documents');
   }
 }
 
 export async function fetchDocument(documentId: string): Promise<Document | null> {
   try {
-    const { data, error } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('id', documentId)
-      .single();
-
-    if (error) {
-      console.error('[fetchDocument] Error:', error);
-      throw new Error('Failed to fetch document');
-    }
-
-    return data || null;
+    return await prisma.documents.findUnique({ where: { id: documentId } });
   } catch (error) {
     console.error('[fetchDocument] Error:', error);
-    throw error;
+    throw new Error('Failed to fetch document');
   }
+}
+
+export type DocumentStatus = Pick<Document, 'id' | 'status' | 'documentType'>;
+
+export async function fetchDocumentStatuses(organizationId: string): Promise<DocumentStatus[]> {
+  return prisma.documents.findMany({
+    where: { organizationId },
+    select: { id: true, status: true, documentType: true },
+  });
 }
 
 export interface DocumentStats {
@@ -70,152 +74,93 @@ export interface DocumentStats {
 }
 
 export async function fetchDocumentStats(organizationId: string): Promise<DocumentStats> {
-  // Fetch documents with just the fields we need for counting
-  const { data, error } = await supabase
-    .from('documents')
-    .select('status, documentType')
-    .eq('organizationId', organizationId);
+  const [statusCounts, typeCounts] = await Promise.all([
+    prisma.documents.groupBy({ by: ['status'], where: { organizationId }, _count: true }),
+    prisma.documents.groupBy({ by: ['documentType'], where: { organizationId }, _count: true }),
+  ]);
 
-  if (error) {
-    console.error('[fetchDocumentStats] Error:', error);
-    throw new Error('Failed to fetch document stats');
-  }
+  const countStatus = (status: string) =>
+    statusCounts.find((row) => row.status === status)?._count ?? 0;
+  const countType = (type: string) =>
+    typeCounts.find((row) => row.documentType === type)?._count ?? 0;
 
-  const docs = data || [];
-
-  // Calculate counts
-  const stats: DocumentStats = {
-    total: docs.length,
+  return {
+    total: statusCounts.reduce((sum, row) => sum + row._count, 0),
     byStatus: {
-      completed: docs.filter((d) => d.status === 'completed').length,
-      processing: docs.filter((d) => d.status === 'processing').length,
-      pending: docs.filter((d) => d.status === 'pending').length,
-      failed: docs.filter((d) => d.status === 'failed').length,
+      completed: countStatus('completed'),
+      processing: countStatus('processing'),
+      pending: countStatus('pending'),
+      failed: countStatus('failed'),
     },
     byType: {
-      bank_statement: docs.filter((d) => d.documentType === 'bank_statement').length,
-      invoice: docs.filter((d) => d.documentType === 'invoice').length,
-      receipt: docs.filter((d) => d.documentType === 'receipt').length,
-      unknown: docs.filter((d) => d.documentType === 'unknown' || !d.documentType).length,
+      bank_statement: countType('bank_statement'),
+      invoice: countType('invoice'),
+      receipt: countType('receipt'),
+      // Documents that haven't been classified yet count as unknown.
+      unknown:
+        countType('unknown') + (typeCounts.find((row) => row.documentType === null)?._count ?? 0),
     },
   };
-
-  return stats;
 }
 
 export async function uploadFileToStorage(filePath: string, file: File): Promise<boolean> {
   try {
-    // Upload file to Supabase Storage
-    const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-
-    if (uploadError) {
-      console.error('[uploadDocument] Storage error:', uploadError);
-      throw new Error('Failed to upload file. Please try again.');
-    }
-
+    await putObject(filePath, file);
     return true;
   } catch (error) {
     console.error('[uploadFileToStorage] Error:', error);
-    throw error;
+    throw new Error('Failed to upload file. Please try again.');
   }
 }
 
-const deleteFileFromStorage = async (filePath: string): Promise<void> => {
+export async function createDocument(input: CreateDocumentInput): Promise<void> {
   try {
-    await supabase.storage.from('documents').remove([filePath]);
-  } catch (error) {
-    console.error('[deleteFileFromStorage] Error:', error);
-    throw error;
-  }
-};
-
-export async function createDocument({
-  id,
-  organizationId,
-  uploadedBy,
-  fileName,
-  filePath,
-  fileSize,
-  mimeType,
-  status,
-}: Database['public']['Tables']['documents']['Insert']): Promise<void> {
-  try {
-    const { error } = await supabase.from('documents').insert({
-      id,
-      organizationId,
-      uploadedBy,
-      fileName,
-      filePath,
-      fileSize,
-      mimeType,
-      status,
-    });
-
-    if (error) {
-      console.error('[createDocument] Database error:', error);
-      throw new Error('Failed to save document. Please try again.');
-    }
+    await prisma.documents.create({ data: input });
   } catch (error) {
     console.error('[createDocument] Error:', error);
-    throw error;
+    throw new Error('Failed to save document. Please try again.');
   }
 }
 
-export async function updateDocument(
-  id: Database['public']['Tables']['documents']['Row']['id'],
-  payload: Database['public']['Tables']['documents']['Update']
-): Promise<void> {
-  try {
-    const { error } = await supabase.from('documents').update(payload).eq('id', id);
+export async function updateDocument(id: string, payload: UpdateDocumentInput): Promise<void> {
+  const { extractedData, ...rest } = payload;
 
-    if (error) {
-      console.error('[updateDocument] Database error:', error);
-      throw new Error('Failed to update document. Please try again.');
-    }
+  try {
+    await prisma.documents.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(extractedData !== undefined && {
+          extractedData: extractedData === null ? Prisma.DbNull : extractedData,
+        }),
+        updatedAt: new Date(),
+      },
+    });
   } catch (error) {
     console.error('[updateDocument] Error:', error);
-    throw error;
+    throw new Error('Failed to update document. Please try again.');
   }
 }
 
 export async function getSignedUrlForFile(filePath: string): Promise<string> {
   try {
-    const { data, error } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(filePath, 3600);
-
-    if (error) {
-      console.error('[getSignedUrlForFile] Error:', error);
-      throw new Error('Failed to get signed URL. Please try again.');
-    }
-
-    return data.signedUrl || '';
+    return await getSignedDownloadUrl(filePath, 3600);
   } catch (error) {
     console.error('[getSignedUrlForFile] Error:', error);
-    throw error;
+    throw new Error('Failed to get signed URL. Please try again.');
   }
 }
 
 export async function deleteDocument(documentId: string): Promise<void> {
   try {
-    // Delete from storage first
     const document = await fetchDocument(documentId);
     if (document?.filePath) {
-      await deleteFileFromStorage(document.filePath);
+      await deleteObject(document.filePath);
     }
 
-    // Delete from database
-    const { error } = await supabase.from('documents').delete().eq('id', documentId);
-
-    if (error) {
-      console.error('[deleteDocument] Error:', error);
-      throw new Error('Failed to delete document');
-    }
+    await prisma.documents.delete({ where: { id: documentId } });
   } catch (error) {
     console.error('[deleteDocument] Error:', error);
-    throw error;
+    throw new Error('Failed to delete document');
   }
 }
