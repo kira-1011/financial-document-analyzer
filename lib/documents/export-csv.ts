@@ -1,8 +1,6 @@
 import JSZip from 'jszip';
-import type { Database } from '@/types/supabase';
+import type { Document } from '@/lib/documents/api';
 import type { BankStatementData, InvoiceData, ReceiptData } from './schemas';
-
-type Document = Database['public']['Tables']['documents']['Row'];
 
 // Helper to escape CSV values (handle commas, quotes, newlines)
 function escapeCSV(value: string | number | undefined | null): string {
@@ -240,7 +238,9 @@ export function exportToCSV(documentType: string, extractedData: unknown, fileNa
 }
 
 // Bulk export multiple documents as a ZIP file
-export async function exportBulkToZip(documents: Document[]): Promise<void> {
+export async function exportBulkToZip(
+  documents: Pick<Document, 'status' | 'documentType' | 'extractedData' | 'fileName'>[]
+): Promise<void> {
   const zip = new JSZip();
   let exportedCount = 0;
 

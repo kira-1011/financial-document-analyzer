@@ -27,12 +27,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { Document } from '@/lib/documents/api';
 import { DOCUMENT_STATUS_LABELS, DOCUMENT_TYPE_LABELS } from '@/lib/documents/constants';
 import { exportToCSV } from '@/lib/documents/export-csv';
 import type { BankStatementData, InvoiceData, ReceiptData } from '@/lib/documents/schemas';
-import type { Database } from '@/types/supabase';
-
-type Document = Database['public']['Tables']['documents']['Row'];
 
 interface DocumentDetailProps {
   document: Document;

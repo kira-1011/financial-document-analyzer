@@ -6,7 +6,7 @@ export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 export const DOCUMENT_STATUS = ['pending', 'processing', 'completed', 'failed'] as const;
 export type DocumentStatus = (typeof DOCUMENT_STATUS)[number];
 
-// Allowed MIME types for upload (matching Supabase bucket config)
+// Allowed MIME types for upload (enforced in upload.ts)
 export const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'image/jpeg',
@@ -14,7 +14,7 @@ export const ALLOWED_MIME_TYPES = [
   'image/png',
 ] as const;
 
-// Maximum file size in bytes (10MB - matching Supabase bucket config)
+// Maximum file size in bytes (10MB)
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 // Human-readable document type labels

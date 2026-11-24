@@ -51,3 +51,4 @@ next-env.d.ts
 /prisma/generated/prisma
 
 /prisma/generated/prisma
+.neon

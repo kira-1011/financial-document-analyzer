@@ -53,7 +53,7 @@
 | [shadcn/ui](https://ui.shadcn.com/)           | Beautifully designed components          | [Documentation](https://ui.shadcn.com/docs)           |
 | [AI SDK](https://ai-sdk.dev/)                 | Vercel AI SDK for structured AI outputs  | [Documentation](https://ai-sdk.dev/docs)              |
 | [Better Auth](https://www.better-auth.com/)   | Authentication with Organizations plugin | [Documentation](https://www.better-auth.com/docs)     |
-| [Supabase](https://supabase.com/)             | PostgreSQL database & file storage       | [Documentation](https://supabase.com/docs)            |
+| [Neon](https://neon.com/)                     | Postgres database & object storage       | [Documentation](https://neon.com/docs)                |
 | [Trigger.dev](https://trigger.dev/)           | Background job processing                | [Documentation](https://trigger.dev/docs)             |
 | [Resend](https://resend.com/)                 | Transactional emails                     | [Documentation](https://resend.com/docs)              |
 | [Vitest](https://vitest.dev/)                 | Fast unit testing framework              | [Documentation](https://vitest.dev/guide/)            |
@@ -65,7 +65,7 @@
 
 - Node.js 22+
 - pnpm (recommended) or npm
-- Supabase account
+- Neon account
 - Google AI API key
 - Trigger.dev account
 - Resend account (for emails)
@@ -88,41 +88,38 @@ pnpm install
 3. **Set up environment variables**
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
 Edit `.env.local` with your credentials (see [Environment Variables](#environment-variables)).
 
-4. **Set up Supabase**
+4. **Set up Neon**
 
-Create a new [Supabase](https://supabase.com) project, then:
-
-```bash
-# Link your project
-pnpm dlx supabase link
-
-# Run Better Auth migrations (creates auth tables)
-pnpm dlx @better-auth/cli@latest migrate
-
-# Run Supabase migrations (creates documents table)
-pnpm dlx supabase db push
-```
-
-5. **Create storage bucket**
-
-Go to Supabase Dashboard → Storage → Create bucket named `documents`:
-
-- Public: No
-- Allowed MIME types: `application/pdf`, `image/jpeg`, `image/png`
-- Max file size: 10MB
-
-7. **Generate TypeScript types**
+The `neon.ts` file declares a Postgres database and a private `documents` bucket. Link it to your Neon project, provision it, and pull the connection strings and storage credentials into `.env.local`:
 
 ```bash
-pnpm run update-supabase-types
+pnpm dlx neon@latest login
+pnpm dlx neon@latest link --project-id <your-project-id>
+pnpm dlx neon@latest deploy
 ```
 
-8. **Set up Trigger.dev**
+5. **Run the database migrations**
+
+```bash
+pnpm db:migrate
+```
+
+6. **Create the search role**
+
+The chat assistant turns questions into SQL. That SQL runs as a separate login role with no table access, against a temporary table holding only the current organization's documents. Create the role and write `SEARCH_DATABASE_URL` to `.env.local`:
+
+```bash
+pnpm db:search-role
+```
+
+Run it once per Neon branch. Running it again rotates the password.
+
+7. **Set up Trigger.dev**
 
 ```bash
 pnpm dlx trigger.dev@latest init
@@ -191,10 +188,14 @@ Create a `.env.local` file with the following variables:
 
 | Variable                        | Description                                         |
 | ------------------------------- | --------------------------------------------------- |
-| `DATABASE_URL`                  | PostgreSQL connection string (from Supabase)        |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Your Supabase project URL                           |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key                              |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service role key (server-side only)        |
+| `DATABASE_URL`                  | Neon pooled connection string (from `neon deploy`)  |
+| `DATABASE_URL_UNPOOLED`         | Neon direct connection string, used for migrations  |
+| `SEARCH_DATABASE_URL`           | Search role connection string (`pnpm db:search-role`) |
+| `AWS_ENDPOINT_URL_S3`           | Neon object storage endpoint (from `neon deploy`)   |
+| `AWS_ACCESS_KEY_ID`             | Neon object storage access key                      |
+| `AWS_SECRET_ACCESS_KEY`         | Neon object storage secret key                      |
+| `AWS_REGION`                    | Neon object storage region                          |
+| `STORAGE_BUCKET`                | Optional bucket name (default: `documents`)         |
 | `BETTER_AUTH_SECRET`            | Random string for session encryption (min 32 chars) |
 | `BETTER_AUTH_URL`               | Your app URL (e.g., `http://localhost:3000`)        |
 | `BETTER_AUTH_TRUSTED_ORIGINS`   | Trusted origins for auth                            |
@@ -204,6 +205,8 @@ Create a `.env.local` file with the following variables:
 | `EMAIL_FROM`                    | From address for emails                             |
 | `TRIGGER_SECRET_KEY`            | Trigger.dev secret key                              |
 | `NEXT_PUBLIC_APP_URL`           | Public app URL                                      |
+| `GOOGLE_CLIENT_ID`              | Google OAuth client ID (sign in with Google)        |
+| `GOOGLE_CLIENT_SECRET`          | Google OAuth client secret                          |
 
 ## Database Schema
 
@@ -211,14 +214,14 @@ Create a `.env.local` file with the following variables:
 
 ```sql
 -- Enums
-CREATE TYPE document_type AS ENUM ('bank_statement', 'invoice', 'receipt');
+CREATE TYPE document_type AS ENUM ('bank_statement', 'invoice', 'receipt', 'unknown');
 CREATE TYPE document_status AS ENUM ('pending', 'processing', 'completed', 'failed');
 
 -- Documents table
 CREATE TABLE documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "organizationId" TEXT NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
-  "uploadedBy" TEXT NOT NULL REFERENCES "user"(id) ON DELETE SET NULL,
+  "uploadedBy" TEXT REFERENCES "user"(id) ON DELETE SET NULL,
   "fileName" TEXT NOT NULL,
   "filePath" TEXT NOT NULL,
   "fileSize" INTEGER,
@@ -235,7 +238,7 @@ CREATE TABLE documents (
 );
 ```
 
-> **Note:** Better Auth tables (`user`, `organization`, `member`, `session`, etc.) are created automatically by running `pnpm dlx @better-auth/cli@latest migrate`.
+The full schema, including the Better Auth tables (`user`, `organization`, `member`, `session`, etc.), lives in `prisma/schema.prisma` and is created by `pnpm db:migrate`.
 
 ## Project Structure
 
@@ -297,21 +300,23 @@ CREATE TABLE documents (
 │   ├── email/                     # Email sending utilities
 │   │   ├── resend.ts              # Resend client
 │   │   └── send-email.ts          # Email sending functions
-│   ├── supabase/                  # Supabase client setup
-│   │   ├── client.ts              # Browser client
-│   │   └── server.ts              # Server client
 │   ├── auth.ts                    # Better Auth configuration
 │   ├── auth-client.ts             # Client-side auth
 │   ├── auth-types.ts              # Auth type definitions
 │   ├── permissions.ts             # Role-based access control
+│   ├── prisma.ts                  # Prisma client (Neon pooled connection)
+│   ├── storage.ts                 # Neon object storage (S3 API)
 │   └── utils.ts                   # Utility functions (cn, etc.)
 ├── trigger/
 │   └── process-document.ts        # Background job for AI processing
 ├── types/
-│   ├── index.ts                   # Custom TypeScript types
-│   └── supabase.ts                # Generated Supabase types
-├── supabase/
+│   └── index.ts                   # Custom TypeScript types
+├── prisma/
+│   ├── schema.prisma              # Database schema
 │   └── migrations/                # Database migrations
+├── scripts/
+│   └── create-search-role.ts      # Creates the chat assistant's search role
+├── neon.ts                        # Neon services (Postgres, documents bucket)
 ├── vitest.config.mts              # Vitest configuration
 ├── vitest.setup.ts                # Test setup file
 ├── biome.json                     # Biome linting & formatting config
@@ -321,7 +326,7 @@ CREATE TABLE documents (
 ## How It Works
 
 1. **Upload** — User uploads a PDF or image of a financial document
-2. **Store** — File is stored in Supabase Storage, record created in database
+2. **Store** — File is stored in Neon object storage, record created in Postgres
 3. **Queue** — Background job is triggered via Trigger.dev
 4. **Classify** — AI classifies the document type (bank statement, invoice, receipt)
 5. **Extract** — AI extracts structured data using type-specific Zod schemas
@@ -362,20 +367,43 @@ This pattern ensures accurate extraction by using document-type-specific schemas
 
 ## Deployment
 
-### Vercel (Recommended)
+### Database
 
-1. Push your code to GitHub
-2. Import the project in Vercel
-3. Add all environment variables
-4. Deploy
+Run the migrations and create the search role against the Neon branch you deploy to (production here):
+
+```bash
+pnpm db:migrate
+pnpm db:search-role
+```
+
+`pnpm db:search-role` prints no secrets. It writes `SEARCH_DATABASE_URL` to `.env.local`, so copy the value from there. Running it again rotates the password, so update Vercel afterwards.
+
+### Vercel
+
+Set these for the Production environment (and Preview, if you use preview deployments), copying the values from `.env.local`:
+
+| Variable                                                                         | Notes                                          |
+| -------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `DATABASE_URL`                                                                   | Neon pooled connection (host ends in `-pooler`) |
+| `SEARCH_DATABASE_URL`                                                            | From `pnpm db:search-role`                     |
+| `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` | Neon object storage                            |
+| `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`                   | `BETTER_AUTH_URL` is your production URL       |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                       | Google sign-in                                 |
+| `GOOGLE_GENERATIVE_AI_API_KEY`, `AI_MODEL`                                       | Gemini                                         |
+| `RESEND_API_KEY`                                                                 | Invitation emails                              |
+| `TRIGGER_SECRET_KEY`                                                             | Starting background jobs                       |
+
+`DATABASE_URL_UNPOOLED` is only needed where you run migrations, not in Vercel. Environment variable changes take effect on the next deployment, so redeploy after changing them.
 
 ### Trigger.dev
 
-Deploy your Trigger.dev tasks:
+The document processing task runs on Trigger.dev, not Vercel, so it needs its own copy of the variables it uses. In the Trigger.dev dashboard, set `DATABASE_URL`, the four `AWS_*` variables, `GOOGLE_GENERATIVE_AI_API_KEY` and `AI_MODEL` for the production environment, then deploy the tasks:
 
 ```bash
-pnpm dlx trigger.dev@latest deploy
+pnpm dlx trigger.dev@4.8.10 deploy
 ```
+
+Keep the CLI version in step with `@trigger.dev/sdk` in `package.json`.
 
 ## Contributing
 
